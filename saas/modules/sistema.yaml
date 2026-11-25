@@ -1,0 +1,499 @@
+# yaml-language-server: $schema=../schema/module.schema.json
+# SaaS Pack v2.0.0 · Mockup Studio · Módulo: entidades, pantallas, APIs, workflows, eventos y reportes
+# Valores válidos en CATALOG.md · Formato y referencias en README.md
+
+kind: module
+slug: sistema
+name: Sistema
+description: Bitácora de actividades, marcas, parámetros, cola de trabajos en segundo plano y respaldos.
+icon: Settings
+color: "#71717A"
+order: 1
+phase: 1
+isCore: true
+entities:
+  - slug: actividad
+    name: Actividad
+    description: Bitácora de cambios de todas las entidades. No lleva ultimaActividadId.
+    icon: TableChart
+    tableName: actividades
+    scope: global
+    indexes:
+      - fields: [entidad, registroId]
+        unique: false
+      - fields: [trabajoId]
+        unique: false
+    fields:
+      - name: entidad
+        type: string
+        maxLength: 80
+        isRequired: true
+        isNullable: false
+      - name: registroId
+        type: uuid
+        isRequired: true
+        isNullable: false
+      - name: accion
+        type: enum
+        enumValues: [CREAR, ACTUALIZAR, ELIMINAR, RESTAURAR, TRANSICION, IMPORTAR, EXPORTAR, IA, SINCRONIZAR]
+        isRequired: true
+        isNullable: false
+      - name: cambios
+        type: json
+        description: Antes y después de los campos modificados
+      - name: descripcion
+        type: string
+        maxLength: 500
+      - name: origen
+        type: enum
+        defaultValue: UI
+        enumValues: [UI, API, TRABAJO, SINCRONIZACION, SISTEMA]
+      - name: trabajoId
+        type: uuid
+  - slug: marca
+    name: Marca
+    description: Separa diseños, lotes y costos por marca (IGNIS, Personal).
+    icon: TableChart
+    tableName: marcas
+    scope: global
+    softDelete: true
+    audited: true
+    fields:
+      - name: nombre
+        type: string
+        maxLength: 80
+        isRequired: true
+        isNullable: false
+      - name: slug
+        type: slug
+        maxLength: 80
+        isRequired: true
+        isUnique: true
+      - name: logo
+        type: image
+      - name: colorPrimario
+        type: color
+      - name: descripcion
+        type: text
+      - name: activa
+        type: boolean
+        defaultValue: "true"
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+  - slug: parametro
+    name: Parametro
+    description: Configuración clave-valor (modelos de IA, DPI, rutas, envío por defecto).
+    icon: TableChart
+    tableName: parametros
+    scope: global
+    audited: true
+    fields:
+      - name: clave
+        type: string
+        maxLength: 100
+        isRequired: true
+        isUnique: true
+      - name: valor
+        type: text
+      - name: tipo
+        type: enum
+        defaultValue: TEXTO
+        enumValues: [TEXTO, NUMERO, BOOLEANO, JSON]
+      - name: grupo
+        type: enum
+        defaultValue: GENERAL
+        enumValues: [GENERAL, IA, RENDER, EXPORTACION, RESPALDO, COSTOS]
+      - name: descripcion
+        type: string
+        maxLength: 300
+      - name: editable
+        type: boolean
+        defaultValue: "true"
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+  - slug: trabajo
+    name: Trabajo
+    description: Cola persistente de tareas en segundo plano.
+    icon: TableChart
+    tableName: trabajos
+    scope: global
+    indexes:
+      - fields: [estado, prioridad]
+        unique: false
+      - fields: [entidad, registroId]
+        unique: false
+    fields:
+      - name: tipo
+        type: enum
+        enumValues:
+          - QUITAR_FONDO
+          - GENERAR_MAPAS
+          - ANALIZAR_BASE_IA
+          - EDITAR_BASE_IA
+          - GENERAR_ESCENA_IA
+          - GENERAR_COPY_IA
+          - SINCRONIZAR_PROVEEDOR
+          - ANALIZAR_ARTE
+          - EMPAQUETAR_LOTE
+          - GENERAR_ARCHIVOS_PRODUCCION
+          - EMPAQUETAR_PRODUCCION
+          - RESPALDO
+        isRequired: true
+        isNullable: false
+      - name: estado
+        type: enum
+        defaultValue: PENDIENTE
+        enumValues: [PENDIENTE, EN_PROCESO, COMPLETADO, FALLIDO, CANCELADO]
+        isRequired: true
+      - name: prioridad
+        type: smallint
+        defaultValue: "5"
+        validation: {min: 1, max: 10}
+      - name: payload
+        type: json
+      - name: resultado
+        type: json
+      - name: error
+        type: text
+      - name: intentos
+        type: smallint
+        defaultValue: "0"
+      - name: maxIntentos
+        type: smallint
+        defaultValue: "3"
+      - name: progreso
+        type: percentage
+        defaultValue: "0"
+      - name: entidad
+        type: string
+        maxLength: 80
+      - name: registroId
+        type: uuid
+      - name: iniciadoEn
+        type: datetime
+      - name: terminadoEn
+        type: datetime
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+    stateMachine:
+      field: estado
+      initial: PENDIENTE
+      states:
+        - name: PENDIENTE
+          label: Pendiente
+        - name: EN_PROCESO
+          label: En proceso
+        - name: COMPLETADO
+          label: Completado
+          isFinal: true
+        - name: FALLIDO
+          label: Fallido
+        - name: CANCELADO
+          label: Cancelado
+          isFinal: true
+      transitions:
+        - from: [PENDIENTE]
+          to: EN_PROCESO
+          action: iniciar
+          event: trabajo.iniciado
+        - from: [EN_PROCESO]
+          to: COMPLETADO
+          action: completar
+          event: trabajo.completado
+        - from: [EN_PROCESO]
+          to: FALLIDO
+          action: fallar
+          event: trabajo.fallido
+        - from: [FALLIDO]
+          to: PENDIENTE
+          action: reintentar
+          event: trabajo.reintentado
+          guard: intentos < maxIntentos
+          roles: [propietario]
+        - from: [PENDIENTE, EN_PROCESO]
+          to: CANCELADO
+          action: cancelar
+          event: trabajo.cancelado
+          roles: [propietario]
+  - slug: respaldo
+    name: Respaldo
+    description: Historial de respaldos hacia el homelab.
+    icon: TableChart
+    tableName: respaldos
+    scope: global
+    fields:
+      - name: destino
+        type: string
+        maxLength: 400
+        isRequired: true
+      - name: estado
+        type: enum
+        defaultValue: EN_PROCESO
+        enumValues: [EN_PROCESO, COMPLETADO, FALLIDO]
+      - name: tamanoBytes
+        type: bigint
+      - name: archivosCopiados
+        type: int
+      - name: iniciadoEn
+        type: datetime
+      - name: terminadoEn
+        type: datetime
+      - name: error
+        type: text
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+    stateMachine:
+      field: estado
+      initial: EN_PROCESO
+      states:
+        - name: EN_PROCESO
+          label: En proceso
+        - name: COMPLETADO
+          label: Completado
+          isFinal: true
+        - name: FALLIDO
+          label: Fallido
+          isFinal: true
+      transitions:
+        - from: [EN_PROCESO]
+          to: COMPLETADO
+          action: completar
+          event: respaldo.completado
+        - from: [EN_PROCESO]
+          to: FALLIDO
+          action: fallar
+          event: respaldo.fallido
+screens:
+  - name: Inicio
+    type: Dashboard
+    route: /
+    menuLabel: INICIO
+    menuIcon: Home
+  - name: Actividades
+    type: List
+    route: /sistema/actividades
+    menuLabel: Actividades
+    menuIcon: History
+    entity: sistema.actividad
+  - name: Marcas
+    type: List
+    route: /sistema/marcas
+    menuLabel: Marcas
+    menuIcon: Sell
+    entity: sistema.marca
+  - name: Marca
+    type: Form
+    route: /sistema/marcas/:id
+    menuLabel: Marca
+    menuIcon: Sell
+    entity: sistema.marca
+  - name: Configuración
+    type: Settings
+    route: /sistema/configuracion
+    menuLabel: CONFIGURACIÓN
+    menuIcon: Settings
+    entity: sistema.parametro
+  - name: Trabajos
+    type: List
+    route: /sistema/trabajos
+    menuLabel: Trabajos
+    menuIcon: Work
+    entity: sistema.trabajo
+  - name: Respaldos
+    type: List
+    route: /sistema/respaldos
+    menuLabel: Respaldos
+    menuIcon: Backup
+    entity: sistema.respaldo
+apis:
+  - name: Listar actividades
+    method: GET
+    path: /api/actividades
+    tags: [sistema]
+    entity: sistema.actividad
+  - name: Historial de un registro
+    method: GET
+    path: /api/actividades/{entidad}/{registroId}
+    tags: [sistema]
+    entity: sistema.actividad
+  - name: Listar marcas
+    method: GET
+    path: /api/marcas
+    tags: [sistema]
+    entity: sistema.marca
+  - name: Crear marca
+    method: POST
+    path: /api/marcas
+    tags: [sistema]
+    entity: sistema.marca
+  - name: Editar marca
+    method: PUT
+    path: /api/marcas/{id}
+    tags: [sistema]
+    entity: sistema.marca
+  - name: Eliminar marca
+    method: DELETE
+    path: /api/marcas/{id}
+    tags: [sistema]
+    entity: sistema.marca
+  - name: Listar parámetros
+    method: GET
+    path: /api/parametros
+    tags: [sistema]
+    entity: sistema.parametro
+  - name: Guardar parámetros
+    method: PUT
+    path: /api/parametros
+    description: Guardado en bloque de parámetros editables
+    tags: [sistema]
+    entity: sistema.parametro
+  - name: Guardar claves de IA
+    method: PUT
+    path: /api/configuracion/claves-ia
+    description: Cifra con DPAPI; nunca devuelve la clave
+    tags: [sistema]
+  - name: Estado de claves de IA
+    method: GET
+    path: /api/configuracion/claves-ia/estado
+    description: Indica si cada clave existe y si responde
+    tags: [sistema]
+  - name: Listar trabajos
+    method: GET
+    path: /api/trabajos
+    tags: [sistema]
+    entity: sistema.trabajo
+  - name: Cancelar trabajo
+    method: POST
+    path: /api/trabajos/{id}/cancelar
+    tags: [sistema]
+    entity: sistema.trabajo
+  - name: Reintentar trabajo
+    method: POST
+    path: /api/trabajos/{id}/reintentar
+    tags: [sistema]
+    entity: sistema.trabajo
+  - name: Ejecutar respaldo
+    method: POST
+    path: /api/respaldos
+    tags: [sistema]
+    entity: sistema.respaldo
+  - name: Listar respaldos
+    method: GET
+    path: /api/respaldos
+    tags: [sistema]
+    entity: sistema.respaldo
+  - name: Hub de progreso
+    method: GET
+    path: /hubs/progreso
+    description: "SignalR: progreso de trabajos y lotes"
+    tags: [sistema]
+workflows:
+  - name: Respaldo diario
+    description: Copia la base y los assets al homelab.
+    trigger: respaldo.programado
+    steps:
+      - type: trigger
+        label: Programado 02:00
+        config:
+          event: respaldo.programado
+      - type: condition
+        label: ¿Destino accesible?
+        config:
+          condition: Directory.Exists(destino)
+      - type: action
+        label: Copiar SQLite
+        config:
+          service: SqliteBackupService
+      - type: action
+        label: Copiar assets incrementales
+        config:
+          service: AssetsSyncService
+      - type: action
+        label: Purgar respaldos de más de 30 días
+        config:
+          service: RetencionRespaldos
+      - type: notification
+        label: Avisar fallo
+        config:
+          channel: toast-windows
+          template: respaldo-fallido
+      - type: end
+        label: Fin
+    nodes:
+      - key: programado-02-00
+        type: start
+        label: Programado 02:00
+        position: {x: 0, y: 0}
+      - key: destino-accesible
+        type: decision
+        label: ¿Destino accesible?
+        position: {x: 240, y: 0}
+      - key: copiar-sq-lite
+        type: action
+        label: Copiar SQLite
+        position: {x: 480, y: 0}
+      - key: copiar-assets-incrementales
+        type: action
+        label: Copiar assets incrementales
+        position: {x: 720, y: 0}
+      - key: purgar-respaldos-de-mas-de-30-dias
+        type: action
+        label: Purgar respaldos de más de 30 días
+        position: {x: 960, y: 0}
+      - key: avisar-fallo
+        type: action
+        label: Avisar fallo
+        position: {x: 480, y: 120}
+      - key: fin
+        type: end
+        label: Fin
+        position: {x: 1200, y: 0}
+    edges:
+      - from: programado-02-00
+        to: destino-accesible
+      - from: destino-accesible
+        to: copiar-sq-lite
+        label: sí
+      - from: destino-accesible
+        to: avisar-fallo
+        label: no
+      - from: copiar-sq-lite
+        to: copiar-assets-incrementales
+      - from: copiar-assets-incrementales
+        to: purgar-respaldos-de-mas-de-30-dias
+      - from: purgar-respaldos-de-mas-de-30-dias
+        to: fin
+      - from: avisar-fallo
+        to: fin
+events:
+  - name: trabajo.completado
+    description: Toast de Windows y aviso por SignalR
+    trigger: on_state_change
+    action: send_notification
+    entity: sistema.trabajo
+  - name: trabajo.fallido
+    description: Toast con el error y botón Reintentar
+    trigger: on_state_change
+    action: send_notification
+    entity: sistema.trabajo
+  - name: respaldo.fallido
+    trigger: on_state_change
+    action: send_notification
+    entity: sistema.respaldo
+reports:
+  - name: Actividad por entidad
+    columns: [entidad, accion, descripcion, origen]
+    filters: [entidad, accion, origen]
+    entity: sistema.actividad
+  - name: Trabajos fallidos
+    columns: [tipo, error, intentos, terminadoEn]
+    filters: [tipo]
+    conditions:
+      - field: estado
+        operator: eq
+        value: FALLIDO
+    entity: sistema.trabajo

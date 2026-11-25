@@ -1,0 +1,464 @@
+# yaml-language-server: $schema=../schema/module.schema.json
+# SaaS Pack v2.0.0 · Mockup Studio · Módulo: entidades, pantallas, APIs, workflows, eventos y reportes
+# Valores válidos en CATALOG.md · Formato y referencias en README.md
+
+kind: module
+slug: disenos
+name: Diseños
+description: Diseños por marca, artes importados de Illustrator, fuentes y composiciones (diseño aplicado a un modelo con técnica, acabado y capas).
+icon: Brush
+color: "#FF5A1F"
+order: 5
+phase: 1
+entities:
+  - slug: diseno
+    name: Diseno
+    description: Diseño de una marca, con una o varias composiciones.
+    icon: TableChart
+    tableName: disenos
+    scope: global
+    softDelete: true
+    audited: true
+    fields:
+      - name: marcaId
+        type: uuid
+        isRequired: true
+      - name: nombre
+        type: string
+        maxLength: 120
+        isRequired: true
+      - name: codigo
+        type: slug
+        maxLength: 80
+        isRequired: true
+        isUnique: true
+      - name: coleccion
+        type: string
+        maxLength: 100
+      - name: temporada
+        type: string
+        maxLength: 40
+      - name: estado
+        type: enum
+        defaultValue: BORRADOR
+        enumValues: [BORRADOR, EN_REVISION, APROBADO, ARCHIVADO]
+      - name: etiquetas
+        type: array
+      - name: miniatura
+        type: image
+      - name: notas
+        type: text
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+    stateMachine:
+      field: estado
+      initial: BORRADOR
+      states:
+        - name: BORRADOR
+          label: Borrador
+        - name: EN_REVISION
+          label: En revisión
+        - name: APROBADO
+          label: Aprobado
+        - name: ARCHIVADO
+          label: Archivado
+          isFinal: true
+      transitions:
+        - from: [BORRADOR]
+          to: EN_REVISION
+          action: enviarRevision
+          event: diseno.en-revision
+          roles: [propietario]
+        - from: [EN_REVISION]
+          to: APROBADO
+          action: aprobar
+          event: diseno.aprobado
+          roles: [propietario]
+        - from: [EN_REVISION, APROBADO]
+          to: BORRADOR
+          action: regresarBorrador
+          event: diseno.reabierto
+          roles: [propietario]
+        - from: [BORRADOR, EN_REVISION, APROBADO]
+          to: ARCHIVADO
+          action: archivar
+          event: diseno.archivado
+          roles: [propietario]
+  - slug: arte
+    name: Arte
+    description: Archivo de arte importado (SVG, AI compatible con PDF, PDF o imagen).
+    icon: TableChart
+    tableName: artes
+    scope: global
+    softDelete: true
+    indexes:
+      - fields: [hashSha256]
+        unique: false
+    fields:
+      - name: disenoId
+        type: uuid
+        isRequired: true
+      - name: nombre
+        type: string
+        maxLength: 120
+        isRequired: true
+      - name: archivoOriginal
+        type: file
+        isRequired: true
+      - name: formato
+        type: enum
+        enumValues: [SVG, AI_PDF, PDF, PNG, JPG, WEBP]
+        isRequired: true
+      - name: esVectorial
+        type: boolean
+        defaultValue: "false"
+      - name: anchoCm
+        type: decimal
+        precision: 7
+        scale: 2
+      - name: altoCm
+        type: decimal
+        precision: 7
+        scale: 2
+      - name: anchoPx
+        type: int
+      - name: altoPx
+        type: int
+      - name: dpi
+        type: smallint
+      - name: coloresDetectados
+        type: array
+        description: Hex de tintas detectadas
+      - name: numeroColores
+        type: smallint
+      - name: vistaPrevia
+        type: image
+      - name: hashSha256
+        type: char
+        maxLength: 64
+        isRequired: true
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+  - slug: fuente
+    name: Fuente
+    description: Tipografías propias para capas de texto.
+    icon: TableChart
+    tableName: fuentes
+    scope: global
+    fields:
+      - name: nombre
+        type: string
+        maxLength: 100
+        isRequired: true
+      - name: familia
+        type: string
+        maxLength: 100
+        isRequired: true
+      - name: archivo
+        type: file
+        isRequired: true
+      - name: peso
+        type: smallint
+        defaultValue: "400"
+      - name: estilo
+        type: enum
+        defaultValue: NORMAL
+        enumValues: [NORMAL, ITALICA]
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+  - slug: composicion
+    name: Composicion
+    description: Diseño aplicado a un modelo de prenda con técnica, acabado, colores elegidos y capas por zona.
+    icon: TableChart
+    tableName: composiciones
+    scope: global
+    softDelete: true
+    audited: true
+    fields:
+      - name: disenoId
+        type: uuid
+        isRequired: true
+      - name: modeloPrendaId
+        type: uuid
+        isRequired: true
+      - name: nombre
+        type: string
+        maxLength: 120
+        isRequired: true
+      - name: tecnica
+        type: enum
+        enumValues: [SERIGRAFIA, DTF, BORDADO, VINIL, PUFF, DTG, SUBLIMACION]
+        isRequired: true
+      - name: acabado
+        type: enum
+        defaultValue: NINGUNO
+        enumValues: [NINGUNO, ACID_WASH, VINTAGE, DESGASTADO, GARMENT_DYE]
+      - name: intensidadAcabado
+        type: percentage
+        defaultValue: "50"
+      - name: coloresSeleccionados
+        type: array
+        description: Ids de ColorPrenda para mockups y lotes
+      - name: numeroZonas
+        type: smallint
+        description: Calculado de capas visibles
+        defaultValue: "0"
+      - name: numeroColores
+        type: smallint
+        description: Calculado de tintas; editable
+        defaultValue: "0"
+      - name: numeroColoresManual
+        type: boolean
+        defaultValue: "false"
+      - name: estado
+        type: enum
+        defaultValue: BORRADOR
+        enumValues: [BORRADOR, LISTA, ARCHIVADA]
+      - name: miniatura
+        type: image
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+    stateMachine:
+      field: estado
+      initial: BORRADOR
+      states:
+        - name: BORRADOR
+          label: Borrador
+        - name: LISTA
+          label: Lista
+        - name: ARCHIVADA
+          label: Archivada
+          isFinal: true
+      transitions:
+        - from: [BORRADOR]
+          to: LISTA
+          action: marcarLista
+          event: composicion.lista
+          guard: capas visibles > 0
+          roles: [propietario]
+        - from: [LISTA]
+          to: BORRADOR
+          action: editar
+          event: composicion.reabierta
+          roles: [propietario]
+        - from: [BORRADOR, LISTA]
+          to: ARCHIVADA
+          action: archivar
+          event: composicion.archivada
+          roles: [propietario]
+  - slug: capa-composicion
+    name: CapaComposicion
+    description: Capa de arte, texto o forma en una zona; medidas en cm sobre el grupo de talla base.
+    icon: TableChart
+    tableName: capas_composicion
+    scope: global
+    indexes:
+      - fields: [composicionId, orden]
+        unique: false
+    fields:
+      - name: composicionId
+        type: uuid
+        isRequired: true
+      - name: zonaImpresionId
+        type: uuid
+        isRequired: true
+      - name: tipo
+        type: enum
+        enumValues: [ARTE, TEXTO, FORMA]
+        isRequired: true
+      - name: arteId
+        type: uuid
+      - name: fuenteId
+        type: uuid
+      - name: texto
+        type: string
+        maxLength: 300
+      - name: colorTexto
+        type: color
+      - name: tintas
+        type: array
+        description: Colores de tinta para serigrafía
+      - name: posXCm
+        type: decimal
+        defaultValue: "0"
+        precision: 7
+        scale: 2
+      - name: posYCm
+        type: decimal
+        defaultValue: "0"
+        precision: 7
+        scale: 2
+      - name: anchoCm
+        type: decimal
+        precision: 7
+        scale: 2
+        isRequired: true
+      - name: altoCm
+        type: decimal
+        precision: 7
+        scale: 2
+        isRequired: true
+      - name: rotacionGrados
+        type: decimal
+        defaultValue: "0"
+        precision: 6
+        scale: 2
+      - name: opacidad
+        type: percentage
+        defaultValue: "100"
+      - name: modoFusion
+        type: enum
+        defaultValue: NORMAL
+        enumValues: [NORMAL, MULTIPLICAR, PANTALLA, SUPERPONER, LUZ_SUAVE]
+      - name: orden
+        type: smallint
+        defaultValue: "0"
+      - name: visible
+        type: boolean
+        defaultValue: "true"
+      - name: bloqueada
+        type: boolean
+        defaultValue: "false"
+      - name: grupoTallaBaseId
+        type: uuid
+        description: Grupo de talla sobre el que se definen las medidas
+      - name: ajustesPorGrupoTalla
+        type: json
+        description: Escala y posición por grupo de talla
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+screens:
+  - name: Diseños
+    type: List
+    route: /disenos
+    menuLabel: DISEÑOS
+    menuIcon: Brush
+    entity: disenos.diseno
+  - name: Diseño
+    type: Detail
+    route: /disenos/:id
+    menuLabel: Diseño
+    menuIcon: Brush
+    entity: disenos.diseno
+  - name: Editor de mockup
+    type: Editor
+    route: /disenos/:id/composiciones/:cid
+    menuLabel: Editor
+    menuIcon: Draw
+    entity: disenos.composicion
+  - name: Fuentes
+    type: List
+    route: /disenos/fuentes
+    menuLabel: Fuentes
+    menuIcon: FontDownload
+    entity: disenos.fuente
+apis:
+  - name: Listar diseños
+    method: GET
+    path: /api/disenos
+    tags: [disenos]
+    entity: disenos.diseno
+  - name: Crear diseño
+    method: POST
+    path: /api/disenos
+    tags: [disenos]
+    entity: disenos.diseno
+  - name: Obtener diseño
+    method: GET
+    path: /api/disenos/{id}
+    tags: [disenos]
+    entity: disenos.diseno
+  - name: Editar diseño
+    method: PUT
+    path: /api/disenos/{id}
+    tags: [disenos]
+    entity: disenos.diseno
+  - name: Cambiar estado del diseño
+    method: POST
+    path: /api/disenos/{id}/{accion}
+    description: enviarRevision, aprobar, regresarBorrador, archivar
+    tags: [disenos]
+    entity: disenos.diseno
+  - name: Importar arte
+    method: POST
+    path: /api/disenos/{id}/artes
+    description: Multipart SVG, AI, PDF o imagen; analiza medidas y tintas
+    tags: [disenos]
+    entity: disenos.arte
+  - name: Descargar arte
+    method: GET
+    path: /api/artes/{id}/archivo
+    tags: [disenos]
+    entity: disenos.arte
+  - name: Eliminar arte
+    method: DELETE
+    path: /api/artes/{id}
+    tags: [disenos]
+    entity: disenos.arte
+  - name: Crear composición
+    method: POST
+    path: /api/disenos/{id}/composiciones
+    tags: [disenos]
+    entity: disenos.composicion
+  - name: Obtener composición
+    method: GET
+    path: /api/composiciones/{id}
+    description: Incluye capas, modelo, zonas, áreas y bases listas
+    tags: [disenos]
+    entity: disenos.composicion
+  - name: Guardar composición
+    method: PUT
+    path: /api/composiciones/{id}
+    description: Guarda composición y todas sus capas en una transacción
+    tags: [disenos]
+    entity: disenos.composicion
+  - name: Duplicar composición
+    method: POST
+    path: /api/composiciones/{id}/duplicar
+    description: Opcionalmente a otro modelo de prenda
+    tags: [disenos]
+    entity: disenos.composicion
+  - name: Cambiar estado de composición
+    method: POST
+    path: /api/composiciones/{id}/{accion}
+    tags: [disenos]
+    entity: disenos.composicion
+  - name: Listar fuentes
+    method: GET
+    path: /api/fuentes
+    tags: [disenos]
+    entity: disenos.fuente
+  - name: Subir fuente
+    method: POST
+    path: /api/fuentes
+    tags: [disenos]
+    entity: disenos.fuente
+events:
+  - name: arte.importado
+    description: Analiza medidas, DPI y tintas
+    trigger: on_create
+    action: enqueue_job
+    entity: disenos.arte
+  - name: composicion.actualizada
+    description: Marca como OBSOLETO los archivos de producción
+    trigger: on_update
+    action: update_record
+    entity: disenos.composicion
+  - name: diseno.aprobado
+    trigger: on_state_change
+    action: log
+    entity: disenos.diseno
+reports:
+  - name: Diseños por colección
+    columns: [nombre, codigo, coleccion, temporada, estado]
+    filters: [marcaId, coleccion, estado]
+    entity: disenos.diseno
+  - name: Composiciones por técnica
+    columns: [nombre, tecnica, acabado, numeroZonas, numeroColores, estado]
+    filters: [tecnica, modeloPrendaId, estado]
+    entity: disenos.composicion

@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=schema/infrastructure.schema.json
+# SaaS Pack v2.0.0 · Mockup Studio · Plataformas, stack tecnológico e infraestructura
+# Valores válidos en CATALOG.md · Formato y referencias en README.md
+
+kind: infrastructure
+extensions:
+  desktop.host: WPF .NET 10 como contenedor de WebView2; Kestrel embebido en 127.0.0.1 con puerto dinámico sirve API y SPA
+  desktop.instalador: "Velopack: Setup.exe por usuario, accesos directos, auto-actualización y rollback"
+  desktop.bandeja: Icono en bandeja; al cerrar con trabajos o lotes en curso se minimiza
+  backend.version: .NET 10 LTS, ASP.NET Core Minimal APIs organizadas por módulo
+  backend.imagenes: SkiaSharp para miniaturas, máscaras, mapas de desplazamiento y sombras
+  backend.ia_local: Microsoft.ML.OnnxRuntime.DirectML + BiRefNet (MIT); respaldo CPU
+  backend.pdf: PdfSharp 6 para PDF vectorial de producción; Docnet o PDFium para rasterizar vistas previas
+  backend.jobs: Tabla trabajos + BackgroundService con System.Threading.Channels; progreso por SignalR
+  backend.contratos: OpenAPI + NSwag genera interfaces y clases TypeScript
+  frontend.build: React 19 + TypeScript estricto + Vite
+  frontend.render2d: PixiJS v8 (WebGL2) con DisplacementFilter y shaders propios de recoloreo y acabados
+  frontend.render3d: three.js + @react-three/fiber (fase 2)
+  frontend.estado: Zustand para el editor y TanStack Query para la API
+  frontend.vectores: SVG nativo; PDF y AI con pdf.js para vista previa
+  datos.ruta: "%LOCALAPPDATA%/MockupStudio (db, assets, logs, secrets.bin)"
+  hardware.objetivo: Ryzen 5 4600G con Radeon integrada, 24 GB RAM, Windows 11 Home
+  cicd.release: "GitHub Actions: build, pruebas, vpk pack y publicación en GitHub Releases"
+platform:
+  targets: [desktop]
+  desktopTech: wpf
+stack:
+  frontend: [react]
+  backend: [dotnet]
+  apiStyle: [rest]
+  database: [sqlite]
+  orm: [efcore]
+  cache: [in-memory]
+  messageBroker: [db-queue]
+  storage: [local-disk]
+  search: [database-fts]
+  realtime: [signalr]
+infrastructure:
+  hosting: [on-premise]
+  observability: [custom:serilog-archivo]
+  cicd: [github-actions]

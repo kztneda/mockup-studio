@@ -1,0 +1,104 @@
+{
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string",
+      "const": "integrations"
+    },
+    "integrations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "description": "Integración. Ver CATALOG.md › IntegrationProvider.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "stripe",
+                  "mercadopago",
+                  "conekta",
+                  "openpay",
+                  "paypal",
+                  "paddle",
+                  "lemonsqueezy",
+                  "adyen",
+                  "facturapi",
+                  "facturama",
+                  "sendgrid",
+                  "ses",
+                  "resend",
+                  "postmark",
+                  "mailgun",
+                  "brevo",
+                  "twilio",
+                  "whatsapp",
+                  "firebase-fcm",
+                  "onesignal",
+                  "slack",
+                  "telegram",
+                  "anthropic",
+                  "openai",
+                  "google-gemini",
+                  "azure-openai",
+                  "aws-bedrock",
+                  "aws",
+                  "azure",
+                  "gcp",
+                  "auth0",
+                  "clerk",
+                  "authentik",
+                  "keycloak",
+                  "keygen",
+                  "posthog",
+                  "google-analytics",
+                  "mixpanel",
+                  "segment",
+                  "google-maps",
+                  "mapbox",
+                  "hubspot",
+                  "salesforce",
+                  "zendesk",
+                  "intercom",
+                  "docusign",
+                  "google-calendar",
+                  "microsoft-graph",
+                  "zoom",
+                  "shippo"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "enabled": {
+            "type": "boolean",
+            "default": true
+          },
+          "config": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": {},
+            "description": "Claves de configuración del proveedor; todos los valores son texto (variables como \"${STRIPE_SECRET_KEY}\", números y booleanos entre comillas)"
+          }
+        },
+        "required": [
+          "provider"
+        ],
+        "additionalProperties": false
+      },
+      "default": []
+    }
+  },
+  "required": [
+    "kind"
+  ],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SaaS Pack v2.0.0 · integrations"
+}

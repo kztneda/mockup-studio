@@ -1,0 +1,492 @@
+# yaml-language-server: $schema=../schema/module.schema.json
+# SaaS Pack v2.0.0 · Mockup Studio · Módulo: entidades, pantallas, APIs, workflows, eventos y reportes
+# Valores válidos en CATALOG.md · Formato y referencias en README.md
+
+kind: module
+slug: costos
+name: Costos de producción
+description: Tarifas de maquila por reglas, costos adicionales y cotizaciones de costo por pieza.
+icon: Calculate
+color: "#EAB308"
+order: 8
+phase: 1
+entities:
+  - slug: tarifa-maquila
+    name: TarifaMaquila
+    description: Precio total por pieza del maquilador (incluye prenda) según técnica, zonas, colores y cantidad.
+    icon: TableChart
+    tableName: tarifas_maquila
+    scope: global
+    softDelete: true
+    audited: true
+    indexes:
+      - fields: [proveedorId, tecnica, activa]
+        unique: false
+    fields:
+      - name: proveedorId
+        type: uuid
+        description: Maquilador
+        isRequired: true
+      - name: modeloPrendaId
+        type: uuid
+        description: Nulo = aplica a cualquier modelo
+      - name: nombre
+        type: string
+        maxLength: 120
+        isRequired: true
+      - name: tecnica
+        type: enum
+        enumValues: [SERIGRAFIA, DTF, BORDADO, VINIL, PUFF, DTG, SUBLIMACION]
+        isRequired: true
+      - name: zonasMin
+        type: smallint
+        defaultValue: "1"
+      - name: zonasMax
+        type: smallint
+      - name: coloresMin
+        type: smallint
+        defaultValue: "1"
+      - name: coloresMax
+        type: smallint
+      - name: cantidadMin
+        type: int
+        defaultValue: "1"
+      - name: cantidadMax
+        type: int
+      - name: precioUnitario
+        type: money
+        validation: {min: 0}
+        isRequired: true
+      - name: incluyePrenda
+        type: boolean
+        defaultValue: "true"
+      - name: incluyeEtiqueta
+        type: boolean
+        defaultValue: "false"
+      - name: vigenteDesde
+        type: date
+      - name: vigenteHasta
+        type: date
+      - name: prioridad
+        type: smallint
+        defaultValue: "0"
+      - name: activa
+        type: boolean
+        defaultValue: "true"
+      - name: notas
+        type: text
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+  - slug: costo-adicional
+    name: CostoAdicional
+    description: Etiqueta interna impresa, bolsa, envío por defecto y otros.
+    icon: TableChart
+    tableName: costos_adicionales
+    scope: global
+    softDelete: true
+    fields:
+      - name: proveedorId
+        type: uuid
+      - name: nombre
+        type: string
+        maxLength: 100
+        isRequired: true
+      - name: concepto
+        type: enum
+        enumValues: [ETIQUETA_INTERNA, BOLSA, EMPAQUE, ENVIO, OTRO]
+        isRequired: true
+      - name: aplicaPor
+        type: enum
+        enumValues: [PIEZA, PEDIDO]
+        isRequired: true
+      - name: monto
+        type: money
+        validation: {min: 0}
+        isRequired: true
+      - name: activo
+        type: boolean
+        defaultValue: "true"
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+  - slug: cotizacion-costo
+    name: CotizacionCosto
+    description: Cálculo del costo por pieza de una composición para una cantidad.
+    icon: TableChart
+    tableName: cotizaciones_costo
+    scope: global
+    audited: true
+    fields:
+      - name: folio
+        type: string
+        maxLength: 20
+        isRequired: true
+        isUnique: true
+      - name: marcaId
+        type: uuid
+        isRequired: true
+      - name: disenoId
+        type: uuid
+        isRequired: true
+      - name: composicionId
+        type: uuid
+        isRequired: true
+      - name: proveedorId
+        type: uuid
+        description: Maquilador
+        isRequired: true
+      - name: cantidad
+        type: int
+        validation: {min: 1}
+        isRequired: true
+      - name: tecnica
+        type: enum
+        enumValues: [SERIGRAFIA, DTF, BORDADO, VINIL, PUFF, DTG, SUBLIMACION]
+        isRequired: true
+      - name: numeroZonas
+        type: smallint
+        isRequired: true
+      - name: numeroColores
+        type: smallint
+        isRequired: true
+      - name: tarifaMaquilaId
+        type: uuid
+      - name: precioMaquilaUnitario
+        type: money
+        defaultValue: "0"
+      - name: adicionalesUnitario
+        type: money
+        defaultValue: "0"
+      - name: envioPedido
+        type: money
+        defaultValue: "0"
+      - name: envioUnitario
+        type: money
+        defaultValue: "0"
+      - name: costoUnitario
+        type: money
+        defaultValue: "0"
+      - name: costoTotal
+        type: money
+        defaultValue: "0"
+      - name: desglose
+        type: json
+        description: Tarifa aplicada, adicionales y fórmula congelados
+      - name: estado
+        type: enum
+        defaultValue: BORRADOR
+        enumValues: [BORRADOR, CALCULADA, CONFIRMADA, DESCARTADA]
+      - name: confirmadaEn
+        type: datetime
+      - name: notas
+        type: text
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+    stateMachine:
+      field: estado
+      initial: BORRADOR
+      states:
+        - name: BORRADOR
+          label: Borrador
+        - name: CALCULADA
+          label: Calculada
+        - name: CONFIRMADA
+          label: Confirmada
+          isFinal: true
+        - name: DESCARTADA
+          label: Descartada
+          isFinal: true
+      transitions:
+        - from: [BORRADOR, CALCULADA]
+          to: CALCULADA
+          action: calcular
+          event: cotizacion-costo.calculada
+          guard: existe tarifa aplicable
+          roles: [propietario]
+        - from: [CALCULADA]
+          to: CONFIRMADA
+          action: confirmar
+          event: cotizacion-costo.confirmada
+          guard: suma de partidas == cantidad
+          roles: [propietario]
+        - from: [BORRADOR, CALCULADA]
+          to: DESCARTADA
+          action: descartar
+          event: cotizacion-costo.descartada
+          roles: [propietario]
+  - slug: cotizacion-partida
+    name: CotizacionPartida
+    description: Corrida por color y talla de la cotización.
+    icon: TableChart
+    tableName: cotizacion_partidas
+    scope: global
+    indexes:
+      - fields: [cotizacionCostoId, colorPrendaId, talla]
+        unique: true
+    fields:
+      - name: cotizacionCostoId
+        type: uuid
+        isRequired: true
+      - name: colorPrendaId
+        type: uuid
+        isRequired: true
+      - name: talla
+        type: enum
+        enumValues: [XS, S, M, L, XL]
+        isRequired: true
+      - name: grupoTallaId
+        type: uuid
+        isRequired: true
+      - name: cantidad
+        type: int
+        validation: {min: 1}
+        isRequired: true
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+screens:
+  - name: Cotizaciones
+    type: List
+    route: /costos/cotizaciones
+    menuLabel: COSTOS
+    menuIcon: Calculate
+    entity: costos.cotizacion-costo
+  - name: Calculadora de costo
+    type: Form
+    route: /costos/cotizaciones/nueva
+    menuLabel: Calcular costo
+    menuIcon: Calculate
+    entity: costos.cotizacion-costo
+  - name: Cotización
+    type: Detail
+    route: /costos/cotizaciones/:id
+    menuLabel: Cotización
+    menuIcon: ReceiptLong
+    entity: costos.cotizacion-costo
+  - name: Tarifas de maquila
+    type: List
+    route: /costos/tarifas
+    menuLabel: Tarifas de maquila
+    menuIcon: PriceChange
+    entity: costos.tarifa-maquila
+  - name: Tarifa de maquila
+    type: Form
+    route: /costos/tarifas/:id
+    menuLabel: Tarifa
+    menuIcon: PriceChange
+    entity: costos.tarifa-maquila
+  - name: Costos adicionales
+    type: List
+    route: /costos/adicionales
+    menuLabel: Costos adicionales
+    menuIcon: AddCard
+    entity: costos.costo-adicional
+apis:
+  - name: Listar tarifas
+    method: GET
+    path: /api/tarifas-maquila
+    tags: [costos]
+    entity: costos.tarifa-maquila
+  - name: Crear tarifa
+    method: POST
+    path: /api/tarifas-maquila
+    tags: [costos]
+    entity: costos.tarifa-maquila
+  - name: Editar tarifa
+    method: PUT
+    path: /api/tarifas-maquila/{id}
+    tags: [costos]
+    entity: costos.tarifa-maquila
+  - name: Eliminar tarifa
+    method: DELETE
+    path: /api/tarifas-maquila/{id}
+    tags: [costos]
+    entity: costos.tarifa-maquila
+  - name: Simular tarifa
+    method: POST
+    path: /api/tarifas-maquila/simular
+    description: Dada técnica, zonas, colores y cantidad devuelve la tarifa que aplicaría
+    tags: [costos]
+    entity: costos.tarifa-maquila
+  - name: Listar costos adicionales
+    method: GET
+    path: /api/costos-adicionales
+    tags: [costos]
+    entity: costos.costo-adicional
+  - name: Guardar costo adicional
+    method: PUT
+    path: /api/costos-adicionales/{id}
+    tags: [costos]
+    entity: costos.costo-adicional
+  - name: Crear cotización
+    method: POST
+    path: /api/cotizaciones
+    description: Toma técnica, zonas y colores de la composición
+    tags: [costos]
+    entity: costos.cotizacion-costo
+  - name: Obtener cotización
+    method: GET
+    path: /api/cotizaciones/{id}
+    tags: [costos]
+    entity: costos.cotizacion-costo
+  - name: Guardar partidas
+    method: PUT
+    path: /api/cotizaciones/{id}/partidas
+    tags: [costos]
+    entity: costos.cotizacion-partida
+  - name: Calcular
+    method: POST
+    path: /api/cotizaciones/{id}/calcular
+    tags: [costos]
+    entity: costos.cotizacion-costo
+  - name: Confirmar
+    method: POST
+    path: /api/cotizaciones/{id}/confirmar
+    tags: [costos]
+    entity: costos.cotizacion-costo
+  - name: Descartar
+    method: POST
+    path: /api/cotizaciones/{id}/descartar
+    tags: [costos]
+    entity: costos.cotizacion-costo
+  - name: Exportar cotización
+    method: GET
+    path: /api/cotizaciones/{id}/pdf
+    tags: [costos]
+    entity: costos.cotizacion-costo
+workflows:
+  - name: Calcular costo por pieza
+    description: Resuelve tarifa, suma adicionales y prorratea el envío.
+    trigger: manual
+    steps:
+      - type: trigger
+        label: Calcular
+        config:
+          event: cotizacion.calcular
+      - type: action
+        label: Resolver tarifa de maquila
+        config:
+          service: TarifaResolver
+          criterio: técnica, zonas, colores, cantidad, modelo, prioridad
+      - type: condition
+        label: ¿Hay tarifa aplicable?
+        config:
+          condition: tarifa != null
+      - type: action
+        label: Sumar adicionales por pieza
+        config:
+          service: CostosAdicionalesService
+          omitir: conceptos incluidos en la tarifa
+      - type: action
+        label: Prorratear envío
+        config:
+          formula: envioPedido / cantidad
+      - type: action
+        label: Calcular unitario y total
+        config:
+          formula: precioMaquila + adicionales + envioUnitario
+      - type: notification
+        label: Avisar sin tarifa
+        config:
+          channel: in-app
+      - type: end
+        label: Fin
+    nodes:
+      - key: calcular
+        type: start
+        label: Calcular
+        position: {x: 0, y: 0}
+      - key: resolver-tarifa-de-maquila
+        type: action
+        label: Resolver tarifa de maquila
+        position: {x: 240, y: 0}
+      - key: hay-tarifa-aplicable
+        type: decision
+        label: ¿Hay tarifa aplicable?
+        position: {x: 480, y: 0}
+      - key: sumar-adicionales-por-pieza
+        type: action
+        label: Sumar adicionales por pieza
+        position: {x: 720, y: 0}
+      - key: prorratear-envio
+        type: action
+        label: Prorratear envío
+        position: {x: 960, y: 0}
+      - key: calcular-unitario-y-total
+        type: action
+        label: Calcular unitario y total
+        position: {x: 1200, y: 0}
+      - key: avisar-sin-tarifa
+        type: action
+        label: Avisar sin tarifa
+        position: {x: 720, y: 120}
+      - key: fin
+        type: end
+        label: Fin
+        position: {x: 1440, y: 0}
+    edges:
+      - from: calcular
+        to: resolver-tarifa-de-maquila
+      - from: resolver-tarifa-de-maquila
+        to: hay-tarifa-aplicable
+      - from: hay-tarifa-aplicable
+        to: sumar-adicionales-por-pieza
+        label: sí
+      - from: hay-tarifa-aplicable
+        to: avisar-sin-tarifa
+        label: no
+      - from: sumar-adicionales-por-pieza
+        to: prorratear-envio
+      - from: prorratear-envio
+        to: calcular-unitario-y-total
+      - from: calcular-unitario-y-total
+        to: fin
+      - from: avisar-sin-tarifa
+        to: fin
+events:
+  - name: cotizacion-costo.confirmada
+    description: Congela desglose; habilita crear paquete de producción
+    trigger: on_state_change
+    action: log
+    entity: costos.cotizacion-costo
+  - name: tarifa-maquila.actualizada
+    trigger: on_update
+    action: log
+    entity: costos.tarifa-maquila
+reports:
+  - name: Costo por diseño
+    columns:
+      - folio
+      - disenoId
+      - tecnica
+      - cantidad
+      - precioMaquilaUnitario
+      - adicionalesUnitario
+      - envioUnitario
+      - costoUnitario
+      - costoTotal
+    filters: [marcaId, disenoId, tecnica]
+    conditions:
+      - field: estado
+        operator: eq
+        value: CONFIRMADA
+    entity: costos.cotizacion-costo
+  - name: Tarifas vigentes
+    columns:
+      - nombre
+      - tecnica
+      - zonasMin
+      - zonasMax
+      - coloresMin
+      - coloresMax
+      - cantidadMin
+      - cantidadMax
+      - precioUnitario
+    filters: [proveedorId, tecnica]
+    conditions:
+      - field: activa
+        operator: eq
+        value: true
+    entity: costos.tarifa-maquila

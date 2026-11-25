@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=schema/integrations.schema.json
+# SaaS Pack v2.0.0 · Mockup Studio · Integraciones de terceros
+# Valores válidos en CATALOG.md · Formato y referencias en README.md
+
+kind: integrations
+integrations:
+  - provider: anthropic
+    config:
+      apiKey: ${DPAPI:ANTHROPIC_API_KEY}
+      model: claude-sonnet-5-5
+      maxTokens: "4096"
+      uso: "Visión y texto: analizar bases, detectar zonas, revisar calidad, copys"
+  - provider: google-gemini
+    config:
+      apiKey: ${DPAPI:GEMINI_API_KEY}
+      model: gemini-nano-banana-2.1
+      modelAltaCalidad: gemini-3-pro-image
+      uso: "Edición y generación de imágenes: limpiar, enderezar, bases nuevas, escenas"
+  - provider: custom:moplayeras-shopify
+    config:
+      baseUrl: https://www.moplayeras.com
+      endpointProducto: /products/{handle}.js
+      solicitudesPorSegundo: "1"
+      modelosIniciales: 4800, 3320, 5542, 6500, 7810
+  - provider: custom:onnx-birefnet
+    config:
+      modelPath: "%LOCALAPPDATA%/MockupStudio/models/birefnet-general.onnx"
+      executionProvider: DirectML
+      fallback: CPU
+      licencia: MIT
+  - provider: custom:velopack
+    config:
+      canal: stable
+      updateUrl: ${VELOPACK_UPDATE_URL}
+  - provider: custom:respaldo-homelab
+    config:
+      destino: ${RUTA_RESPALDO_HOMELAB}
+      horario: 0 2 * * *
+      retencionDias: "30"

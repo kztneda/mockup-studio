@@ -1,0 +1,629 @@
+{
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string",
+      "const": "project"
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": {},
+      "description": "Datos sin campo propio, por ruta con puntos (\"project.appUrl\": …); se conservan sin afectar al modelo"
+    },
+    "schemaVersion": {
+      "type": "string",
+      "default": "2.0.0"
+    },
+    "project": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "description": "Identificador corto en minúsculas (repositorio, paquetes, subdominio)"
+        },
+        "tagline": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 2000,
+          "default": ""
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+\\.\\d+$",
+          "default": "1.0.0"
+        },
+        "language": {
+          "type": "string",
+          "default": "es"
+        },
+        "languages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "timezone": {
+          "type": "string",
+          "default": "America/Mexico_City"
+        },
+        "currency": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 3,
+          "default": "MXN"
+        },
+        "supportedCurrencies": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 3
+          }
+        },
+        "domain": {
+          "type": "string"
+        },
+        "saasType": {
+          "description": "Tipo de SaaS. Ver CATALOG.md › SaaSType.",
+          "type": "string",
+          "enum": [
+            "B2B",
+            "B2C",
+            "B2B2C",
+            "B2G",
+            "Internal"
+          ],
+          "default": "B2B"
+        },
+        "logoUrl": {
+          "anyOf": [
+            {
+              "anyOf": [
+                {
+                  "not": {}
+                },
+                {
+                  "type": "string",
+                  "format": "uri"
+                }
+              ]
+            },
+            {
+              "type": "string",
+              "const": ""
+            }
+          ]
+        },
+        "primaryColor": {
+          "type": "string",
+          "default": "#1976d2"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "additionalProperties": false
+    },
+    "multiTenant": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "strategy": {
+          "description": "Estrategia multi-tenant. Ver CATALOG.md › MultiTenantStrategy.",
+          "type": "string",
+          "enum": [
+            "shared",
+            "isolated",
+            "hybrid"
+          ],
+          "default": "shared"
+        },
+        "subdomain": {
+          "type": "boolean",
+          "default": false
+        },
+        "customDomain": {
+          "type": "boolean",
+          "default": false
+        },
+        "isolationLevel": {
+          "description": "Nivel de aislamiento de datos. Ver CATALOG.md › IsolationLevel.",
+          "type": "string",
+          "enum": [
+            "row",
+            "schema",
+            "database"
+          ],
+          "default": "row"
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "security": {
+      "type": "object",
+      "properties": {
+        "auth": {
+          "type": "object",
+          "properties": {
+            "providers": {
+              "type": "array",
+              "items": {
+                "description": "Proveedor de autenticación. Ver CATALOG.md › AuthProvider.",
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "local",
+                      "magic-link",
+                      "passkeys",
+                      "phone-otp",
+                      "google",
+                      "microsoft",
+                      "apple",
+                      "github",
+                      "facebook",
+                      "oauth2",
+                      "saml",
+                      "authentik",
+                      "keycloak",
+                      "auth0",
+                      "clerk",
+                      "cognito",
+                      "firebase-auth",
+                      "supabase-auth",
+                      "keygen"
+                    ]
+                  },
+                  {
+                    "type": "string",
+                    "pattern": "^custom:.+"
+                  }
+                ]
+              },
+              "default": [
+                "local"
+              ]
+            },
+            "mfa": {
+              "type": "boolean",
+              "default": false
+            },
+            "sessionTimeout": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "default": 3600
+            },
+            "jwtExpiry": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "default": 86400
+            },
+            "oauthConfigs": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "clientId": {
+                    "type": "string",
+                    "default": ""
+                  },
+                  "clientSecret": {
+                    "type": "string",
+                    "default": ""
+                  },
+                  "issuerUrl": {
+                    "type": "string",
+                    "default": ""
+                  },
+                  "authorizationUrl": {
+                    "type": "string"
+                  },
+                  "tokenUrl": {
+                    "type": "string"
+                  },
+                  "userinfoUrl": {
+                    "type": "string"
+                  },
+                  "scope": {
+                    "type": "string",
+                    "default": "openid profile email"
+                  },
+                  "callbackUrl": {
+                    "type": "string"
+                  },
+                  "realm": {
+                    "type": "string"
+                  },
+                  "accountId": {
+                    "type": "string"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false,
+          "default": {}
+        },
+        "encryption": {
+          "type": "object",
+          "properties": {
+            "atRest": {
+              "type": "boolean",
+              "default": true
+            },
+            "inTransit": {
+              "type": "boolean",
+              "default": true,
+              "description": "true o false (la versión de TLS va en extensions o en policies)"
+            },
+            "algorithm": {
+              "type": "string",
+              "default": "AES-256"
+            }
+          },
+          "additionalProperties": false,
+          "default": {}
+        },
+        "audit": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "retention": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 90
+            }
+          },
+          "additionalProperties": false,
+          "default": {}
+        },
+        "rateLimit": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean",
+              "default": true
+            },
+            "requestsPerMinute": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "default": 60
+            }
+          },
+          "additionalProperties": false,
+          "default": {}
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "billing": {
+      "type": "object",
+      "properties": {
+        "provider": {
+          "description": "Proveedor de cobro. Ver CATALOG.md › BillingProvider.",
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "stripe",
+                "mercadopago",
+                "conekta",
+                "openpay",
+                "paddle",
+                "lemonsqueezy",
+                "paypal",
+                "chargebee",
+                "manual",
+                "none"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^custom:.+"
+            }
+          ],
+          "default": "stripe"
+        },
+        "trialDays": {
+          "type": "integer",
+          "minimum": 0,
+          "default": 14
+        },
+        "currency": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 3,
+          "default": "MXN"
+        },
+        "plans": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "price": {
+                "type": "number",
+                "minimum": 0
+              },
+              "currency": {
+                "type": "string",
+                "minLength": 3,
+                "maxLength": 3
+              },
+              "contactSales": {
+                "type": "boolean",
+                "description": "true si el precio se cotiza con ventas (price: 0)"
+              },
+              "interval": {
+                "description": "Periodicidad del plan. Ver CATALOG.md › BillingInterval.",
+                "type": "string",
+                "enum": [
+                  "monthly",
+                  "quarterly",
+                  "yearly",
+                  "weekly",
+                  "one-time",
+                  "usage"
+                ]
+              },
+              "features": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "default": []
+              },
+              "limits": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "default": {},
+                "description": "Límites del plan por clave; números, -1 = sin límite (no escribas \"unlimited\")"
+              },
+              "isPopular": {
+                "type": "boolean",
+                "default": false
+              }
+            },
+            "required": [
+              "name",
+              "price",
+              "interval"
+            ],
+            "additionalProperties": false
+          },
+          "default": []
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "policies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "default": ""
+          },
+          "claims": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": []
+          },
+          "conditions": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "default": []
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "default": ""
+          },
+          "trigger": {
+            "description": "Disparador de evento. Ver CATALOG.md › EventTrigger.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "on_create",
+                  "on_update",
+                  "on_delete",
+                  "on_state_change",
+                  "on_approve",
+                  "on_reject",
+                  "on_login",
+                  "scheduled",
+                  "webhook",
+                  "manual"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "action": {
+            "description": "Reacción al evento. Ver CATALOG.md › EventAction.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "send_email",
+                  "send_notification",
+                  "send_sms",
+                  "call_webhook",
+                  "trigger_workflow",
+                  "update_record",
+                  "enqueue_job",
+                  "log"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "payload": {
+            "type": "string",
+            "default": ""
+          },
+          "entity": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "name",
+          "trigger"
+        ],
+        "additionalProperties": false
+      },
+      "default": []
+    },
+    "dashboards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "Widget de dashboard. Ver CATALOG.md › WidgetType.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "kpi",
+                  "card",
+                  "progress",
+                  "gauge",
+                  "line",
+                  "area",
+                  "bar",
+                  "pie",
+                  "funnel",
+                  "heatmap",
+                  "chart",
+                  "table",
+                  "list",
+                  "timeline",
+                  "calendar",
+                  "map"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "dataSource": {
+            "type": "string",
+            "default": ""
+          },
+          "config": {
+            "type": "object",
+            "additionalProperties": {},
+            "default": {},
+            "description": "Parámetros del widget: entity, metric (count|sum|avg), field, groupBy, filter, dateField, interval, sort, limit, target…"
+          },
+          "position": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              },
+              "w": {
+                "type": "number"
+              },
+              "h": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "w",
+              "h"
+            ],
+            "additionalProperties": false,
+            "default": {
+              "x": 0,
+              "y": 0,
+              "w": 4,
+              "h": 2
+            }
+          }
+        },
+        "required": [
+          "type",
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "default": []
+    }
+  },
+  "required": [
+    "kind",
+    "project"
+  ],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SaaS Pack v2.0.0 · project"
+}

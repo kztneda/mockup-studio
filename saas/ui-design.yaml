@@ -1,0 +1,50 @@
+# yaml-language-server: $schema=schema/ui-design.schema.json
+# SaaS Pack v2.0.0 · Mockup Studio · Diseño de interfaz
+# Valores válidos en CATALOG.md · Formato y referencias en README.md
+
+kind: ui-design
+extensions:
+  editor.atajos: V mover, H mano, T texto, I imagen, Ctrl+D duplicar, Ctrl+Z y Ctrl+Y deshacer y rehacer, Supr eliminar capa
+  editor.unidades: mm, cm e in; cm por defecto
+componentLibrary: shadcn-ui
+defaultThemeMode: dark
+generalInstructions: "Herramienta creativa tipo editor profesional: lienzo al centro, barra de herramientas vertical a la izquierda, panel de capas y propiedades a la derecha y selector de vistas arriba del lienzo. Estética street, moderna y limpia. Títulos de sección en MAYÚSCULAS con tracking abierto."
+colors:
+  primary: "#FF5A1F"
+  secondary: "#E8E3D9"
+  accent: "#FFB020"
+  error: "#EF4444"
+  warning: "#F59E0B"
+  success: "#22C55E"
+  info: "#38BDF8"
+  backgroundDefault: "#0E0E10"
+  backgroundPaper: "#18181B"
+  textPrimary: "#F4F4F5"
+  textSecondary: "#A1A1AA"
+typography:
+  fontFamily: inter
+  baseFontSizePx: 13
+  headingFontFamily: space-grotesk
+  lineHeight: 1.45
+  letterSpacing: normal
+layout:
+  navType: mini-sidebar
+  sidebarWidthPx: 64
+  contentMaxWidthPx: 0
+  density: compact
+  topbarHeightPx: 48
+  footerEnabled: false
+  breadcrumbsEnabled: false
+shape:
+  borderRadiusPreset: soft
+  buttonStyle: soft
+  inputStyle: filled
+  elevationStyle: border
+branding:
+  brandName: MOCKUP STUDIO
+  brandTagline: BUILD IT. PRINT IT.
+  splashScreenEnabled: true
+animationsEnabled: true
+rtlSupport: false
+accessibilityLevel: A
+designNotes: Fondo del lienzo con cuadrícula sutil y reglas en cm. Muestras de color de prenda como círculos de 28px con nombre en tooltip. Indicador de área de impresión con contorno punteado naranja. Vista dividida 2D y patrón al estilo de referencia.

@@ -1,0 +1,540 @@
+erDiagram
+  Actividad {
+    string entidad
+    uuid registroId
+    enum accion
+    json cambios
+    string descripcion
+    enum origen
+    uuid trabajoId
+  }
+  Marca {
+    string nombre
+    slug slug UK
+    image logo
+    color colorPrimario
+    text descripcion
+    boolean activa
+    uuid ultimaActividadId
+  }
+  Parametro {
+    string clave UK
+    text valor
+    enum tipo
+    enum grupo
+    string descripcion
+    boolean editable
+    uuid ultimaActividadId
+  }
+  Trabajo {
+    enum tipo
+    enum estado
+    smallint prioridad
+    json payload
+    json resultado
+    text error
+    smallint intentos
+    smallint maxIntentos
+    percentage progreso
+    string entidad
+    uuid registroId
+    datetime iniciadoEn
+    datetime terminadoEn
+    uuid ultimaActividadId
+  }
+  Respaldo {
+    string destino
+    enum estado
+    bigint tamanoBytes
+    int archivosCopiados
+    datetime iniciadoEn
+    datetime terminadoEn
+    text error
+    uuid ultimaActividadId
+  }
+  PromptPlantilla {
+    slug clave UK
+    string nombre
+    enum proveedor
+    string modelo
+    enum tipo
+    text prompt
+    json esquemaSalida
+    decimal temperatura
+    smallint version
+    boolean activa
+    uuid ultimaActividadId
+  }
+  ConsumoIa {
+    enum proveedor
+    string modelo
+    enum operacion
+    uuid promptPlantillaId
+    uuid trabajoId
+    int tokensEntrada
+    int tokensSalida
+    smallint imagenesEntrada
+    smallint imagenesSalida
+    decimal costoEstimadoUsd
+    int duracionMs
+    boolean exitoso
+    text error
+    uuid ultimaActividadId
+  }
+  ContenidoGenerado {
+    uuid marcaId
+    uuid disenoId
+    enum tipo
+    text texto
+    enum estado
+    uuid consumoIaId
+    uuid ultimaActividadId
+  }
+  Proveedor {
+    string nombre
+    enum tipo
+    enum plataforma
+    url sitioWeb
+    string contacto
+    phone telefono
+    email email
+    text notas
+    boolean activo
+    uuid ultimaActividadId
+  }
+  ModeloPrenda {
+    uuid proveedorId
+    string codigo
+    string nombre
+    enum categoria
+    enum corte
+    smallint gramaje
+    string composicion
+    array tallasDisponibles
+    url urlProducto
+    string handleTienda
+    money precioReferencia
+    image imagenReferencia
+    text descripcion
+    boolean activo
+    datetime sincronizadoEn
+    uuid ultimaActividadId
+  }
+  ColorPrenda {
+    uuid modeloPrendaId
+    string nombre
+    string codigoProveedor
+    color hex
+    boolean hexAjustadoManual
+    boolean esJaspeado
+    enum tono
+    string composicion
+    image imagenFrente
+    image imagenEspalda
+    boolean disponible
+    int existencias
+    smallint orden
+    uuid ultimaActividadId
+  }
+  GrupoTalla {
+    string nombre UK
+    array tallas
+    smallint orden
+    boolean activo
+    uuid ultimaActividadId
+  }
+  EscalonPrecioProveedor {
+    uuid modeloPrendaId
+    int cantidadMin
+    int cantidadMax
+    money precioUnitario
+    uuid ultimaActividadId
+  }
+  ZonaImpresion {
+    uuid modeloPrendaId
+    enum codigo
+    string nombre
+    enum vista
+    smallint orden
+    boolean activa
+    uuid ultimaActividadId
+  }
+  AreaImpresion {
+    uuid zonaImpresionId
+    uuid grupoTallaId
+    decimal anchoMaxCm
+    decimal altoMaxCm
+    decimal distanciaCuelloCm
+    uuid ultimaActividadId
+  }
+  BaseMockup {
+    uuid modeloPrendaId
+    string nombre
+    enum categoria
+    enum vista
+    enum origen
+    enum estado
+    enum colorBase
+    uuid colorPrendaId
+    image imagenOriginal
+    image imagenPreparada
+    image imagenRecorte
+    image mascara
+    image mapaDesplazamiento
+    image mapaSombras
+    image miniatura
+    int anchoPx
+    int altoPx
+    decimal pxPorCm
+    decimal intensidadDesplazamiento
+    boolean usoIaGenerativa
+    json analisisIa
+    text notas
+    uuid ultimaActividadId
+  }
+  ZonaBase {
+    uuid baseMockupId
+    uuid zonaImpresionId
+    string nombre
+    json puntos
+    decimal rotacionGrados
+    decimal curvatura
+    enum origen
+    percentage confianzaIa
+    uuid ultimaActividadId
+  }
+  Escena {
+    string nombre
+    enum tipo
+    color colorFondo
+    color colorFondo2
+    image imagenFondo
+    boolean sombraSuelo
+    json configuracion
+    boolean activa
+    uuid ultimaActividadId
+  }
+  Diseno {
+    uuid marcaId
+    string nombre
+    slug codigo UK
+    string coleccion
+    string temporada
+    enum estado
+    array etiquetas
+    image miniatura
+    text notas
+    uuid ultimaActividadId
+  }
+  Arte {
+    uuid disenoId
+    string nombre
+    file archivoOriginal
+    enum formato
+    boolean esVectorial
+    decimal anchoCm
+    decimal altoCm
+    int anchoPx
+    int altoPx
+    smallint dpi
+    array coloresDetectados
+    smallint numeroColores
+    image vistaPrevia
+    char hashSha256
+    uuid ultimaActividadId
+  }
+  Fuente {
+    string nombre
+    string familia
+    file archivo
+    smallint peso
+    enum estilo
+    uuid ultimaActividadId
+  }
+  Composicion {
+    uuid disenoId
+    uuid modeloPrendaId
+    string nombre
+    enum tecnica
+    enum acabado
+    percentage intensidadAcabado
+    array coloresSeleccionados
+    smallint numeroZonas
+    smallint numeroColores
+    boolean numeroColoresManual
+    enum estado
+    image miniatura
+    uuid ultimaActividadId
+  }
+  CapaComposicion {
+    uuid composicionId
+    uuid zonaImpresionId
+    enum tipo
+    uuid arteId
+    uuid fuenteId
+    string texto
+    color colorTexto
+    array tintas
+    decimal posXCm
+    decimal posYCm
+    decimal anchoCm
+    decimal altoCm
+    decimal rotacionGrados
+    percentage opacidad
+    enum modoFusion
+    smallint orden
+    boolean visible
+    boolean bloqueada
+    uuid grupoTallaBaseId
+    json ajustesPorGrupoTalla
+    uuid ultimaActividadId
+  }
+  PerfilExportacion {
+    string nombre UK
+    enum motor
+    enum tipoSalida
+    enum formato
+    int anchoPx
+    int altoPx
+    boolean fondoTransparente
+    smallint calidad
+    uuid escenaId
+    string patronNombre
+    smallint duracionSeg
+    smallint fps
+    boolean activo
+    uuid ultimaActividadId
+  }
+  Lote {
+    uuid marcaId
+    string nombre
+    enum estado
+    json configuracion
+    int totalItems
+    int itemsListos
+    int itemsFallidos
+    file archivoZip
+    datetime iniciadoEn
+    datetime terminadoEn
+    uuid ultimaActividadId
+  }
+  LoteItem {
+    uuid loteId
+    uuid composicionId
+    uuid baseMockupId
+    uuid colorPrendaId
+    uuid escenaId
+    uuid perfilExportacionId
+    string nombreArchivo
+    enum estado
+    file archivo
+    image miniatura
+    text error
+    int duracionMs
+    boolean favorito
+    uuid ultimaActividadId
+  }
+  ArchivoProduccion {
+    uuid composicionId
+    uuid zonaImpresionId
+    uuid grupoTallaId
+    enum formato
+    decimal anchoCm
+    decimal altoCm
+    smallint dpi
+    file archivo
+    char hashSha256
+    enum estado
+    text error
+    datetime generadoEn
+    uuid ultimaActividadId
+  }
+  PaqueteProduccion {
+    uuid composicionId
+    uuid cotizacionCostoId
+    string nombre
+    boolean incluyeMockups
+    text notasMaquilador
+    file fichaPdf
+    file archivoZip
+    enum estado
+    datetime enviadoEn
+    uuid ultimaActividadId
+  }
+  TarifaMaquila {
+    uuid proveedorId
+    uuid modeloPrendaId
+    string nombre
+    enum tecnica
+    smallint zonasMin
+    smallint zonasMax
+    smallint coloresMin
+    smallint coloresMax
+    int cantidadMin
+    int cantidadMax
+    money precioUnitario
+    boolean incluyePrenda
+    boolean incluyeEtiqueta
+    date vigenteDesde
+    date vigenteHasta
+    smallint prioridad
+    boolean activa
+    text notas
+    uuid ultimaActividadId
+  }
+  CostoAdicional {
+    uuid proveedorId
+    string nombre
+    enum concepto
+    enum aplicaPor
+    money monto
+    boolean activo
+    uuid ultimaActividadId
+  }
+  CotizacionCosto {
+    string folio UK
+    uuid marcaId
+    uuid disenoId
+    uuid composicionId
+    uuid proveedorId
+    int cantidad
+    enum tecnica
+    smallint numeroZonas
+    smallint numeroColores
+    uuid tarifaMaquilaId
+    money precioMaquilaUnitario
+    money adicionalesUnitario
+    money envioPedido
+    money envioUnitario
+    money costoUnitario
+    money costoTotal
+    json desglose
+    enum estado
+    datetime confirmadaEn
+    text notas
+    uuid ultimaActividadId
+  }
+  CotizacionPartida {
+    uuid cotizacionCostoId
+    uuid colorPrendaId
+    enum talla
+    uuid grupoTallaId
+    int cantidad
+    uuid ultimaActividadId
+  }
+  Modelo3d {
+    uuid modeloPrendaId
+    string version
+    enum fuente
+    file archivoGlb
+    file archivoFuente
+    decimal escalaCm
+    enum estado
+    text notas
+    uuid ultimaActividadId
+  }
+  PiezaPatron {
+    uuid modelo3dId
+    string nombre
+    uuid zonaImpresionId
+    decimal anchoCm
+    decimal altoCm
+    smallint cortes
+    json regionUv
+    uuid ultimaActividadId
+  }
+  MaterialTela {
+    string nombre
+    enum tipo
+    image mapaNormal
+    decimal rugosidad
+    decimal tamanoTejido
+    decimal arrugas
+    uuid ultimaActividadId
+  }
+  Actividad }o--|| Trabajo : "trabajo"
+  Marca }o--|| Actividad : "ultimaActividad"
+  Parametro }o--|| Actividad : "ultimaActividad"
+  Trabajo }o--|| Actividad : "ultimaActividad"
+  Respaldo }o--|| Actividad : "ultimaActividad"
+  PromptPlantilla }o--|| Actividad : "ultimaActividad"
+  ConsumoIa }o--|| Actividad : "ultimaActividad"
+  ConsumoIa }o--|| PromptPlantilla : "plantilla"
+  ConsumoIa }o--|| Trabajo : "trabajo"
+  ContenidoGenerado }o--|| Actividad : "ultimaActividad"
+  ContenidoGenerado }o--|| Marca : "marca"
+  ContenidoGenerado }o--|| Diseno : "diseno"
+  ContenidoGenerado }o--|| ConsumoIa : "consumo"
+  Proveedor }o--|| Actividad : "ultimaActividad"
+  ModeloPrenda }o--|| Actividad : "ultimaActividad"
+  ModeloPrenda }o--|| Proveedor : "proveedor"
+  ColorPrenda }o--|| Actividad : "ultimaActividad"
+  ColorPrenda }o--|| ModeloPrenda : "modelo"
+  GrupoTalla }o--|| Actividad : "ultimaActividad"
+  EscalonPrecioProveedor }o--|| Actividad : "ultimaActividad"
+  EscalonPrecioProveedor }o--|| ModeloPrenda : "modelo"
+  ZonaImpresion }o--|| Actividad : "ultimaActividad"
+  ZonaImpresion }o--|| ModeloPrenda : "modelo"
+  AreaImpresion }o--|| Actividad : "ultimaActividad"
+  AreaImpresion }o--|| ZonaImpresion : "zona"
+  AreaImpresion }o--|| GrupoTalla : "grupoTalla"
+  BaseMockup }o--|| Actividad : "ultimaActividad"
+  BaseMockup }o--|| ModeloPrenda : "modelo"
+  BaseMockup }o--|| ColorPrenda : "colorFijo"
+  ZonaBase }o--|| Actividad : "ultimaActividad"
+  ZonaBase }o--|| BaseMockup : "base"
+  ZonaBase }o--|| ZonaImpresion : "zona"
+  Escena }o--|| Actividad : "ultimaActividad"
+  Diseno }o--|| Actividad : "ultimaActividad"
+  Diseno }o--|| Marca : "marca"
+  Arte }o--|| Actividad : "ultimaActividad"
+  Arte }o--|| Diseno : "diseno"
+  Fuente }o--|| Actividad : "ultimaActividad"
+  Composicion }o--|| Actividad : "ultimaActividad"
+  Composicion }o--|| Diseno : "diseno"
+  Composicion }o--|| ModeloPrenda : "modelo"
+  CapaComposicion }o--|| Actividad : "ultimaActividad"
+  CapaComposicion }o--|| Composicion : "composicion"
+  CapaComposicion }o--|| ZonaImpresion : "zona"
+  CapaComposicion }o--|| Arte : "arte"
+  CapaComposicion }o--|| Fuente : "fuente"
+  CapaComposicion }o--|| GrupoTalla : "grupoTallaBase"
+  PerfilExportacion }o--|| Actividad : "ultimaActividad"
+  PerfilExportacion }o--|| Escena : "escena"
+  Lote }o--|| Actividad : "ultimaActividad"
+  Lote }o--|| Marca : "marca"
+  LoteItem }o--|| Actividad : "ultimaActividad"
+  LoteItem }o--|| Lote : "lote"
+  LoteItem }o--|| Composicion : "composicion"
+  LoteItem }o--|| BaseMockup : "base"
+  LoteItem }o--|| ColorPrenda : "color"
+  LoteItem }o--|| Escena : "escena"
+  LoteItem }o--|| PerfilExportacion : "perfil"
+  ArchivoProduccion }o--|| Actividad : "ultimaActividad"
+  ArchivoProduccion }o--|| Composicion : "composicion"
+  ArchivoProduccion }o--|| ZonaImpresion : "zona"
+  ArchivoProduccion }o--|| GrupoTalla : "grupoTalla"
+  PaqueteProduccion }o--|| Actividad : "ultimaActividad"
+  PaqueteProduccion }o--|| Composicion : "composicion"
+  PaqueteProduccion }o--|| CotizacionCosto : "cotizacion"
+  TarifaMaquila }o--|| Actividad : "ultimaActividad"
+  TarifaMaquila }o--|| Proveedor : "maquilador"
+  TarifaMaquila }o--|| ModeloPrenda : "modelo"
+  CostoAdicional }o--|| Actividad : "ultimaActividad"
+  CostoAdicional }o--|| Proveedor : "proveedor"
+  CotizacionCosto }o--|| Actividad : "ultimaActividad"
+  CotizacionCosto }o--|| Marca : "marca"
+  CotizacionCosto }o--|| Diseno : "diseno"
+  CotizacionCosto }o--|| Composicion : "composicion"
+  CotizacionCosto }o--|| Proveedor : "maquilador"
+  CotizacionCosto }o--|| TarifaMaquila : "tarifa"
+  CotizacionPartida }o--|| Actividad : "ultimaActividad"
+  CotizacionPartida }o--|| CotizacionCosto : "cotizacion"
+  CotizacionPartida }o--|| ColorPrenda : "color"
+  CotizacionPartida }o--|| GrupoTalla : "grupoTalla"
+  Modelo3d }o--|| Actividad : "ultimaActividad"
+  Modelo3d }o--|| ModeloPrenda : "modelo"
+  PiezaPatron }o--|| Actividad : "ultimaActividad"
+  PiezaPatron }o--|| Modelo3d : "modelo3d"
+  PiezaPatron }o--|| ZonaImpresion : "zona"
+  MaterialTela }o--|| Actividad : "ultimaActividad"

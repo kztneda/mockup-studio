@@ -1,0 +1,526 @@
+{
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string",
+      "const": "infrastructure"
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": {},
+      "description": "Datos sin campo propio, por ruta con puntos (\"project.appUrl\": …); se conservan sin afectar al modelo"
+    },
+    "platform": {
+      "type": "object",
+      "properties": {
+        "targets": {
+          "type": "array",
+          "items": {
+            "description": "Plataformas objetivo. Ver CATALOG.md › AppPlatform.",
+            "type": "string",
+            "enum": [
+              "web",
+              "mobile",
+              "desktop"
+            ]
+          },
+          "minItems": 1,
+          "default": [
+            "web"
+          ]
+        },
+        "mobileTech": {
+          "description": "Framework móvil. Ver CATALOG.md › MobileTech.",
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "expo",
+                "react-native",
+                "flutter",
+                "kotlin-multiplatform",
+                "maui",
+                "capacitor",
+                "ionic",
+                "nativescript",
+                "swiftui",
+                "jetpack-compose"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^custom:.+"
+            }
+          ]
+        },
+        "desktopTech": {
+          "description": "Framework desktop. Ver CATALOG.md › DesktopTech.",
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "electron",
+                "tauri",
+                "wails",
+                "maui",
+                "wpf",
+                "avalonia",
+                "flutter",
+                "qt"
+              ]
+            },
+            {
+              "type": "string",
+              "pattern": "^custom:.+"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "stack": {
+      "type": "object",
+      "properties": {
+        "frontend": {
+          "type": "array",
+          "items": {
+            "description": "Frontend web. Ver CATALOG.md › FrontendTech.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "nextjs",
+                  "react",
+                  "react-router",
+                  "vue",
+                  "nuxt",
+                  "angular",
+                  "svelte",
+                  "sveltekit",
+                  "solid",
+                  "astro",
+                  "qwik",
+                  "blazor",
+                  "htmx"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "default": []
+        },
+        "backend": {
+          "type": "array",
+          "items": {
+            "description": "Backend. Ver CATALOG.md › BackendTech.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "nestjs",
+                  "express",
+                  "fastify",
+                  "hono",
+                  "adonisjs",
+                  "dotnet",
+                  "spring",
+                  "quarkus",
+                  "ktor",
+                  "django",
+                  "fastapi",
+                  "laravel",
+                  "rails",
+                  "go",
+                  "axum",
+                  "phoenix"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "default": []
+        },
+        "apiStyle": {
+          "type": "array",
+          "items": {
+            "description": "Estilo de API. Ver CATALOG.md › ApiStyle.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "rest",
+                  "graphql",
+                  "grpc",
+                  "trpc",
+                  "odata",
+                  "websocket",
+                  "webhooks"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "default": []
+        },
+        "database": {
+          "type": "array",
+          "items": {
+            "description": "Base de datos. Ver CATALOG.md › DatabaseTech.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "postgresql",
+                  "mysql",
+                  "mariadb",
+                  "sqlserver",
+                  "oracle",
+                  "sqlite",
+                  "cockroachdb",
+                  "mongodb",
+                  "dynamodb",
+                  "cosmosdb",
+                  "firestore",
+                  "cassandra",
+                  "clickhouse"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "default": []
+        },
+        "orm": {
+          "type": "array",
+          "items": {
+            "description": "ORM / acceso a datos. Ver CATALOG.md › OrmTech.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "prisma",
+                  "drizzle",
+                  "typeorm",
+                  "mikro-orm",
+                  "sequelize",
+                  "kysely",
+                  "mongoose",
+                  "efcore",
+                  "dapper",
+                  "hibernate",
+                  "django-orm",
+                  "sqlalchemy",
+                  "eloquent",
+                  "active-record",
+                  "gorm",
+                  "ecto",
+                  "diesel"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "default": []
+        },
+        "cache": {
+          "type": "array",
+          "items": {
+            "description": "Cache. Ver CATALOG.md › CacheTech.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "redis",
+                  "valkey",
+                  "dragonfly",
+                  "memcached",
+                  "in-memory"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "default": []
+        },
+        "messageBroker": {
+          "type": "array",
+          "items": {
+            "description": "Mensajería y colas. Ver CATALOG.md › BrokerTech.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "rabbitmq",
+                  "kafka",
+                  "nats",
+                  "sqs",
+                  "azure-service-bus",
+                  "google-pubsub",
+                  "bullmq",
+                  "hangfire",
+                  "celery",
+                  "sidekiq",
+                  "db-queue"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "default": []
+        },
+        "storage": {
+          "type": "array",
+          "items": {
+            "description": "Almacenamiento de archivos. Ver CATALOG.md › StorageTech.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "s3",
+                  "r2",
+                  "azure-blob",
+                  "gcs",
+                  "minio",
+                  "backblaze-b2",
+                  "cloudinary",
+                  "uploadthing",
+                  "local-disk"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "default": []
+        },
+        "search": {
+          "type": "array",
+          "items": {
+            "description": "Búsqueda. Ver CATALOG.md › SearchTech.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "database-fts",
+                  "meilisearch",
+                  "typesense",
+                  "elasticsearch",
+                  "opensearch",
+                  "algolia",
+                  "pgvector"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "default": []
+        },
+        "realtime": {
+          "type": "array",
+          "items": {
+            "description": "Tiempo real. Ver CATALOG.md › RealtimeTech.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "websocket",
+                  "socketio",
+                  "signalr",
+                  "sse",
+                  "pusher",
+                  "ably",
+                  "mercure"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "default": []
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "infrastructure": {
+      "type": "object",
+      "properties": {
+        "hosting": {
+          "type": "array",
+          "items": {
+            "description": "Hosting / nube. Ver CATALOG.md › HostingTech.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "aws",
+                  "azure",
+                  "gcp",
+                  "vercel",
+                  "netlify",
+                  "cloudflare",
+                  "fly",
+                  "railway",
+                  "render",
+                  "heroku",
+                  "digitalocean",
+                  "hetzner",
+                  "vps",
+                  "on-premise"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "default": []
+        },
+        "containerization": {
+          "type": "array",
+          "items": {
+            "description": "Contenedores y orquestación. Ver CATALOG.md › ContainerTech.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "docker",
+                  "docker-compose",
+                  "kubernetes",
+                  "helm",
+                  "podman",
+                  "ecs",
+                  "cloud-run",
+                  "serverless"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "default": []
+        },
+        "iac": {
+          "type": "array",
+          "items": {
+            "description": "Infraestructura como código. Ver CATALOG.md › IacTech.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "terraform",
+                  "opentofu",
+                  "pulumi",
+                  "bicep",
+                  "cloudformation",
+                  "ansible"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "default": []
+        },
+        "observability": {
+          "type": "array",
+          "items": {
+            "description": "Observabilidad. Ver CATALOG.md › ObservabilityTech.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "opentelemetry",
+                  "prometheus",
+                  "grafana",
+                  "loki",
+                  "elk",
+                  "seq",
+                  "jaeger",
+                  "sentry",
+                  "datadog",
+                  "new-relic",
+                  "app-insights",
+                  "cloudwatch"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "default": []
+        },
+        "cicd": {
+          "type": "array",
+          "items": {
+            "description": "CI/CD. Ver CATALOG.md › CicdTech.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "github-actions",
+                  "gitlab-ci",
+                  "azure-devops",
+                  "bitbucket-pipelines",
+                  "woodpecker",
+                  "jenkins",
+                  "circleci",
+                  "argocd"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "default": []
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    }
+  },
+  "required": [
+    "kind"
+  ],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SaaS Pack v2.0.0 · infrastructure"
+}

@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=schema/roles.schema.json
+# SaaS Pack v2.0.0 · Mockup Studio · Roles y permisos (resource: "<modulo>" o "<modulo>.<entidad>")
+# Valores válidos en CATALOG.md · Formato y referencias en README.md
+
+kind: roles
+roles:
+  - slug: propietario
+    name: Propietario
+    description: Único usuario de la instalación local; acceso total.
+    scope: global
+    color: "#FF5A1F"
+    isSystem: true
+    permissions:
+      - resource: sistema
+        actions: [manage]
+      - resource: ia
+        actions: [manage]
+      - resource: catalogo
+        actions: [manage]
+      - resource: bases
+        actions: [manage]
+      - resource: disenos
+        actions: [manage]
+      - resource: mockups
+        actions: [manage]
+      - resource: produccion
+        actions: [manage]
+      - resource: costos
+        actions: [manage]
+      - resource: modelos-3d
+        actions: [manage]

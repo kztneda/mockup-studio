@@ -1,0 +1,296 @@
+{
+  ".claude/settings.json": {
+    "mtime": 1795588320.7630365,
+    "seen": 1795588599.4498022,
+    "ast_hash": "8d0b8cd2cddeeba6ace4d2fd1e77577b",
+    "semantic_hash": ""
+  },
+  "saas/schema/infrastructure.schema.json": {
+    "mtime": 1795588270.3119884,
+    "seen": 1795588599.4498081,
+    "ast_hash": "cdddb9bb566a132f55b2fd371d8e35ec",
+    "semantic_hash": ""
+  },
+  "saas/schema/integrations.schema.json": {
+    "mtime": 1795588270.336022,
+    "seen": 1795588599.4498105,
+    "ast_hash": "1ecfc4651025a2dcae96bb6431715e8d",
+    "semantic_hash": ""
+  },
+  "saas/schema/module.schema.json": {
+    "mtime": 1795588270.352044,
+    "seen": 1795588599.4498117,
+    "ast_hash": "46026cf25478f2570d04e15b9ee116fe",
+    "semantic_hash": ""
+  },
+  "saas/schema/project.schema.json": {
+    "mtime": 1795588270.3039875,
+    "seen": 1795588599.449813,
+    "ast_hash": "a6d7264c577755c3127163ec1b6991b9",
+    "semantic_hash": ""
+  },
+  "saas/schema/relations.schema.json": {
+    "mtime": 1795588270.3440192,
+    "seen": 1795588599.449814,
+    "ast_hash": "5a2e87f8604bed8b03621894bc9d2e24",
+    "semantic_hash": ""
+  },
+  "saas/schema/roles.schema.json": {
+    "mtime": 1795588270.3280058,
+    "seen": 1795588599.4498155,
+    "ast_hash": "141ca838bf80c2199f0130a47cb7bb53",
+    "semantic_hash": ""
+  },
+  "saas/schema/ui-design.schema.json": {
+    "mtime": 1795588270.3204973,
+    "seen": 1795588599.4498165,
+    "ast_hash": "6506be0568ca5984d54e1527684c6e7d",
+    "semantic_hash": ""
+  },
+  ".claude/CLAUDE.md": {
+    "mtime": 1795588320.7580338,
+    "seen": 1795588599.4498177,
+    "ast_hash": "c232166e6492ba1ed955030b16979b05",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/SKILL.md": {
+    "mtime": 1795588320.7520275,
+    "seen": 1795588599.4498188,
+    "ast_hash": "b10224376cdb873ee154b818d39aa5bb",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/add-watch.md": {
+    "mtime": 1789419345.7397628,
+    "seen": 1795588599.44982,
+    "ast_hash": "d59d027fe449f06aa03905a01184e779",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/exports.md": {
+    "mtime": 1789419345.7407572,
+    "seen": 1795588599.4498215,
+    "ast_hash": "9da2a2152e60a22f07f05fed5158f287",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/extraction-spec.md": {
+    "mtime": 1789419345.7417552,
+    "seen": 1795588599.4498224,
+    "ast_hash": "42fef56a01698118f7fd722acdadea34",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/github-and-merge.md": {
+    "mtime": 1789419345.7417552,
+    "seen": 1795588599.4498239,
+    "ast_hash": "cde13df085e4c492aeb7ba298a996d0d",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/hooks.md": {
+    "mtime": 1789419345.743265,
+    "seen": 1795588599.449825,
+    "ast_hash": "3f545db6ce646650bb9de588f5512a27",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/query.md": {
+    "mtime": 1789419345.7442746,
+    "seen": 1795588599.4498262,
+    "ast_hash": "3c46f8ad006874260614ed8657d02307",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/transcribe.md": {
+    "mtime": 1789419345.7452729,
+    "seen": 1795588599.4498274,
+    "ast_hash": "67b6a5fa6c0974e18f60db9f8932fbd8",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/update.md": {
+    "mtime": 1789419345.7462747,
+    "seen": 1795588599.4498284,
+    "ast_hash": "9378bd03d56baaf78bd738ab3848f142",
+    "semantic_hash": ""
+  },
+  ".planning/modules/_platform/spec.md": {
+    "mtime": 1795588270.0262809,
+    "seen": 1795588599.4498296,
+    "ast_hash": "a8c48b6c2bd9be0e44824d68768004ac",
+    "semantic_hash": ""
+  },
+  ".planning/modules/bases/spec.md": {
+    "mtime": 1795588270.0747328,
+    "seen": 1795588599.4498308,
+    "ast_hash": "d238d8c295f07494f41f2fc87c9e3223",
+    "semantic_hash": ""
+  },
+  ".planning/modules/catalogo/spec.md": {
+    "mtime": 1795588270.057364,
+    "seen": 1795588599.449832,
+    "ast_hash": "54fd2b892718a13fa49f81aab1a40d0c",
+    "semantic_hash": ""
+  },
+  ".planning/modules/costos/spec.md": {
+    "mtime": 1795588270.133265,
+    "seen": 1795588599.4498334,
+    "ast_hash": "abbe3e454a2bd937efc61e984725c368",
+    "semantic_hash": ""
+  },
+  ".planning/modules/disenos/spec.md": {
+    "mtime": 1795588270.089246,
+    "seen": 1795588599.449835,
+    "ast_hash": "810200030f8b3637fc0748cf41b1bef5",
+    "semantic_hash": ""
+  },
+  ".planning/modules/ia/spec.md": {
+    "mtime": 1795588270.1042366,
+    "seen": 1795588599.4498363,
+    "ast_hash": "a97e76713feeb3753eb616cb25a47c0d",
+    "semantic_hash": ""
+  },
+  ".planning/modules/mockups/spec.md": {
+    "mtime": 1795588270.1187496,
+    "seen": 1795588599.4498372,
+    "ast_hash": "606904140c33d913a2454749a34b325d",
+    "semantic_hash": ""
+  },
+  ".planning/modules/modelos-3d/spec.md": {
+    "mtime": 1795588270.1612647,
+    "seen": 1795588599.4498386,
+    "ast_hash": "b5f323be1c7c7c477533ee7cce38da39",
+    "semantic_hash": ""
+  },
+  ".planning/modules/produccion/spec.md": {
+    "mtime": 1795588270.147265,
+    "seen": 1795588599.4498396,
+    "ast_hash": "03f09a4dc0fa6937d9cdbfed12c86fe4",
+    "semantic_hash": ""
+  },
+  ".planning/modules/sistema/spec.md": {
+    "mtime": 1795588270.0423634,
+    "seen": 1795588599.4498405,
+    "ast_hash": "1bc6357f895ac3a8fa839fd7d591e9c5",
+    "semantic_hash": ""
+  },
+  ".planning/roadmap.md": {
+    "mtime": 1795588270.007244,
+    "seen": 1795588599.449842,
+    "ast_hash": "b498b1d25586b3dc11166ea7216074b0",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1795588320.761034,
+    "seen": 1795588599.4498432,
+    "ast_hash": "9c0cd3f99c0e80b20da75f4a29c90413",
+    "semantic_hash": ""
+  },
+  "DESIGN.md": {
+    "mtime": 1795588269.9867256,
+    "seen": 1795588599.4498441,
+    "ast_hash": "2176f0c1ee711a27f90d917f8c1bcc76",
+    "semantic_hash": ""
+  },
+  "SCAFFOLD.md": {
+    "mtime": 1795588269.9957323,
+    "seen": 1795588599.4498456,
+    "ast_hash": "6dc004e1f4af0b79adc9f1b215bb4209",
+    "semantic_hash": ""
+  },
+  "saas/CATALOG.md": {
+    "mtime": 1795588270.2318182,
+    "seen": 1795588599.4498463,
+    "ast_hash": "fe9a3b1f21f64c9a8a876906c7c6effa",
+    "semantic_hash": ""
+  },
+  "saas/README.md": {
+    "mtime": 1795588270.189758,
+    "seen": 1795588599.4498475,
+    "ast_hash": "4da8c1f66f58d1d3b3625febdbc97810",
+    "semantic_hash": ""
+  },
+  "saas/infrastructure.yaml": {
+    "mtime": 1795588270.201275,
+    "seen": 1795588599.4498487,
+    "ast_hash": "5c3a27648772907db91c055731335bed",
+    "semantic_hash": ""
+  },
+  "saas/integrations.yaml": {
+    "mtime": 1795588270.2182984,
+    "seen": 1795588599.44985,
+    "ast_hash": "d677c16db4475a1ed6ab4d6748f97648",
+    "semantic_hash": ""
+  },
+  "saas/modules/bases.yaml": {
+    "mtime": 1795588270.2604642,
+    "seen": 1795588599.449852,
+    "ast_hash": "7586dd19795113dcfed9fe03b6b090f3",
+    "semantic_hash": ""
+  },
+  "saas/modules/catalogo.yaml": {
+    "mtime": 1795588270.2548175,
+    "seen": 1795588599.4498532,
+    "ast_hash": "10d324e95737200a0534286ef2182f8c",
+    "semantic_hash": ""
+  },
+  "saas/modules/costos.yaml": {
+    "mtime": 1795588270.283479,
+    "seen": 1795588599.4498546,
+    "ast_hash": "3d9fcaf7e27e013fc49bd3afe324c88f",
+    "semantic_hash": ""
+  },
+  "saas/modules/disenos.yaml": {
+    "mtime": 1795588270.266466,
+    "seen": 1795588599.4498565,
+    "ast_hash": "50f4556d48047f4723ff9edce0de09ca",
+    "semantic_hash": ""
+  },
+  "saas/modules/ia.yaml": {
+    "mtime": 1795588270.2488177,
+    "seen": 1795588599.4498577,
+    "ast_hash": "450afc89b0e3cd7c75db16c78eb34720",
+    "semantic_hash": ""
+  },
+  "saas/modules/mockups.yaml": {
+    "mtime": 1795588270.2714722,
+    "seen": 1795588599.4498596,
+    "ast_hash": "4b622a17de6bc75e402a0348d63bf3ce",
+    "semantic_hash": ""
+  },
+  "saas/modules/modelos-3d.yaml": {
+    "mtime": 1795588270.289982,
+    "seen": 1795588599.449862,
+    "ast_hash": "431169e68031a796ed75f4adbd91b4d3",
+    "semantic_hash": ""
+  },
+  "saas/modules/produccion.yaml": {
+    "mtime": 1795588270.277472,
+    "seen": 1795588599.449865,
+    "ast_hash": "b61adad9fee1b9d25c95ee5f4ca643e6",
+    "semantic_hash": ""
+  },
+  "saas/modules/sistema.yaml": {
+    "mtime": 1795588270.2428162,
+    "seen": 1795588599.449867,
+    "ast_hash": "b12a36c3296bbf4c155403e6c87c424e",
+    "semantic_hash": ""
+  },
+  "saas/project.yaml": {
+    "mtime": 1795588270.1957574,
+    "seen": 1795588599.4498684,
+    "ast_hash": "268f495a8cbdadab46744c35d1ec4cf9",
+    "semantic_hash": ""
+  },
+  "saas/relations.yaml": {
+    "mtime": 1795588270.2242994,
+    "seen": 1795588599.4498718,
+    "ast_hash": "2de9ee713ab9f8fb902d756a206b45d1",
+    "semantic_hash": ""
+  },
+  "saas/roles.yaml": {
+    "mtime": 1795588270.2132914,
+    "seen": 1795588599.4498754,
+    "ast_hash": "2e644b4f40fac9d1bf52a875470057cc",
+    "semantic_hash": ""
+  },
+  "saas/ui-design.yaml": {
+    "mtime": 1795588270.2072735,
+    "seen": 1795588599.4498775,
+    "ast_hash": "b24ae31ef717d0567e8c6a0721eb3aa6",
+    "semantic_hash": ""
+  }
+}

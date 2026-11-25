@@ -1,0 +1,343 @@
+{
+  "type": "object",
+  "properties": {
+    "componentLibrary": {
+      "description": "Librería de componentes. Ver CATALOG.md › UIComponentLibrary.",
+      "type": "string",
+      "enum": [
+        "material-ui",
+        "shadcn-ui",
+        "ant-design",
+        "mantine",
+        "chakra-ui",
+        "fluent-ui",
+        "tailwind",
+        "daisyui",
+        "bootstrap",
+        "primefaces",
+        "angular-material",
+        "vuetify",
+        "quasar",
+        "nativewind",
+        "tamagui",
+        "react-native-paper",
+        "custom"
+      ],
+      "default": "material-ui"
+    },
+    "defaultThemeMode": {
+      "description": "Tema por defecto. Ver CATALOG.md › ThemeMode.",
+      "type": "string",
+      "enum": [
+        "light",
+        "dark",
+        "system"
+      ],
+      "default": "light"
+    },
+    "generalInstructions": {
+      "type": "string"
+    },
+    "colors": {
+      "type": "object",
+      "properties": {
+        "primary": {
+          "type": "string",
+          "default": "#1976d2"
+        },
+        "secondary": {
+          "type": "string",
+          "default": "#9c27b0"
+        },
+        "accent": {
+          "type": "string",
+          "default": "#ff9800"
+        },
+        "error": {
+          "type": "string",
+          "default": "#d32f2f"
+        },
+        "warning": {
+          "type": "string",
+          "default": "#ed6c02"
+        },
+        "success": {
+          "type": "string",
+          "default": "#2e7d32"
+        },
+        "info": {
+          "type": "string",
+          "default": "#0288d1"
+        },
+        "backgroundDefault": {
+          "type": "string",
+          "default": "#f5f5f5"
+        },
+        "backgroundPaper": {
+          "type": "string",
+          "default": "#ffffff"
+        },
+        "textPrimary": {
+          "type": "string",
+          "default": "#212121"
+        },
+        "textSecondary": {
+          "type": "string",
+          "default": "#757575"
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "typography": {
+      "type": "object",
+      "properties": {
+        "fontFamily": {
+          "description": "Tipografía. Ver CATALOG.md › UIFontFamily.",
+          "type": "string",
+          "enum": [
+            "inter",
+            "roboto",
+            "open-sans",
+            "lato",
+            "nunito",
+            "poppins",
+            "montserrat",
+            "manrope",
+            "dm-sans",
+            "ibm-plex-sans",
+            "source-sans",
+            "space-grotesk",
+            "geist",
+            "system-ui",
+            "custom"
+          ],
+          "default": "inter"
+        },
+        "customFontFamily": {
+          "type": "string"
+        },
+        "customFontUrl": {
+          "type": "string"
+        },
+        "baseFontSizePx": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 14
+        },
+        "headingFontFamily": {
+          "description": "Tipografía. Ver CATALOG.md › UIFontFamily.",
+          "type": "string",
+          "enum": [
+            "inter",
+            "roboto",
+            "open-sans",
+            "lato",
+            "nunito",
+            "poppins",
+            "montserrat",
+            "manrope",
+            "dm-sans",
+            "ibm-plex-sans",
+            "source-sans",
+            "space-grotesk",
+            "geist",
+            "system-ui",
+            "custom"
+          ]
+        },
+        "lineHeight": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "default": 1.5
+        },
+        "letterSpacing": {
+          "description": "Espaciado de letras. Ver CATALOG.md › LetterSpacing.",
+          "type": "string",
+          "enum": [
+            "tight",
+            "normal",
+            "wide"
+          ],
+          "default": "normal"
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "layout": {
+      "type": "object",
+      "properties": {
+        "navType": {
+          "description": "Navegación. Ver CATALOG.md › NavLayoutType.",
+          "type": "string",
+          "enum": [
+            "sidebar-left",
+            "sidebar-right",
+            "mini-sidebar",
+            "topnav",
+            "topnav-sidebar",
+            "bottom-tabs"
+          ],
+          "default": "sidebar-left"
+        },
+        "sidebarWidthPx": {
+          "type": "number",
+          "minimum": 0,
+          "default": 240
+        },
+        "contentMaxWidthPx": {
+          "type": "number",
+          "minimum": 0,
+          "default": 0
+        },
+        "density": {
+          "description": "Densidad. Ver CATALOG.md › DesignDensity.",
+          "type": "string",
+          "enum": [
+            "compact",
+            "comfortable",
+            "spacious"
+          ],
+          "default": "comfortable"
+        },
+        "topbarHeightPx": {
+          "type": "number",
+          "minimum": 0,
+          "default": 64
+        },
+        "footerEnabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "breadcrumbsEnabled": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "shape": {
+      "type": "object",
+      "properties": {
+        "borderRadiusPreset": {
+          "description": "Redondeo de bordes. Ver CATALOG.md › BorderRadiusPreset.",
+          "type": "string",
+          "enum": [
+            "sharp",
+            "soft",
+            "rounded",
+            "large",
+            "pill"
+          ],
+          "default": "rounded"
+        },
+        "customBorderRadiusPx": {
+          "type": "number",
+          "minimum": 0
+        },
+        "buttonStyle": {
+          "description": "Estilo de botón. Ver CATALOG.md › ButtonStyle.",
+          "type": "string",
+          "enum": [
+            "filled",
+            "soft",
+            "outlined",
+            "ghost"
+          ],
+          "default": "filled"
+        },
+        "inputStyle": {
+          "description": "Estilo de input. Ver CATALOG.md › InputStyle.",
+          "type": "string",
+          "enum": [
+            "outlined",
+            "filled",
+            "standard"
+          ],
+          "default": "outlined"
+        },
+        "elevationStyle": {
+          "description": "Elevación. Ver CATALOG.md › ElevationStyle.",
+          "type": "string",
+          "enum": [
+            "flat",
+            "border",
+            "shadow",
+            "glass"
+          ],
+          "default": "shadow"
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "branding": {
+      "type": "object",
+      "properties": {
+        "logoUrl": {
+          "type": "string"
+        },
+        "faviconUrl": {
+          "type": "string"
+        },
+        "brandName": {
+          "type": "string"
+        },
+        "brandTagline": {
+          "type": "string"
+        },
+        "loginBackground": {
+          "type": "string"
+        },
+        "splashScreenEnabled": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "animationsEnabled": {
+      "type": "boolean",
+      "default": true
+    },
+    "rtlSupport": {
+      "type": "boolean",
+      "default": false
+    },
+    "accessibilityLevel": {
+      "description": "Accesibilidad. Ver CATALOG.md › AccessibilityLevel.",
+      "type": "string",
+      "enum": [
+        "none",
+        "A",
+        "AA",
+        "AAA"
+      ],
+      "default": "AA"
+    },
+    "customCss": {
+      "type": "string"
+    },
+    "designNotes": {
+      "type": "string"
+    },
+    "kind": {
+      "type": "string",
+      "const": "ui-design"
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": {},
+      "description": "Datos sin campo propio, por ruta con puntos (\"project.appUrl\": …); se conservan sin afectar al modelo"
+    }
+  },
+  "required": [
+    "kind"
+  ],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SaaS Pack v2.0.0 · ui-design"
+}

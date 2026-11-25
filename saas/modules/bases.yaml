@@ -1,0 +1,466 @@
+# yaml-language-server: $schema=../schema/module.schema.json
+# SaaS Pack v2.0.0 · Mockup Studio · Módulo: entidades, pantallas, APIs, workflows, eventos y reportes
+# Valores válidos en CATALOG.md · Formato y referencias en README.md
+
+kind: module
+slug: bases
+name: Bases de mockup
+description: "Fotos de prendas en blanco preparadas para mockup: recorte, mapas, zonas detectadas y escenas."
+icon: Image
+color: "#38BDF8"
+order: 4
+phase: 1
+entities:
+  - slug: base-mockup
+    name: BaseMockup
+    description: Foto de una prenda en una vista lista para recibir diseños.
+    icon: TableChart
+    tableName: bases_mockup
+    scope: global
+    softDelete: true
+    audited: true
+    indexes:
+      - fields: [modeloPrendaId, vista]
+        unique: false
+      - fields: [estado]
+        unique: false
+    fields:
+      - name: modeloPrendaId
+        type: uuid
+        description: Nulo para prendas sin modelo de proveedor
+      - name: nombre
+        type: string
+        maxLength: 120
+        isRequired: true
+      - name: categoria
+        type: enum
+        enumValues: [PLAYERA, PLAYERA_VINTAGE, RAGLAN, HOODIE, SUDADERA, SHORT, PANTS, GORRA, TOTE, OTRA]
+        isRequired: true
+      - name: vista
+        type: enum
+        enumValues: [FRENTE, ESPALDA, IZQUIERDA, DERECHA, TRES_CUARTOS]
+        isRequired: true
+      - name: origen
+        type: enum
+        enumValues: [FOTO_PROPIA, PROVEEDOR, GENERADA_IA]
+        isRequired: true
+      - name: estado
+        type: enum
+        defaultValue: BORRADOR
+        enumValues: [BORRADOR, PROCESANDO, EN_REVISION, LISTA, RECHAZADA, ARCHIVADA]
+      - name: colorBase
+        type: enum
+        defaultValue: BLANCO
+        enumValues: [BLANCO, CLARO, OSCURO]
+      - name: colorPrendaId
+        type: uuid
+        description: Color fijo cuando colorBase es OSCURO
+      - name: imagenOriginal
+        type: image
+        isRequired: true
+      - name: imagenPreparada
+        type: image
+        description: Resultado aprobado de edición con IA
+      - name: imagenRecorte
+        type: image
+        description: PNG sin fondo
+      - name: mascara
+        type: image
+      - name: mapaDesplazamiento
+        type: image
+      - name: mapaSombras
+        type: image
+      - name: miniatura
+        type: image
+      - name: anchoPx
+        type: int
+      - name: altoPx
+        type: int
+      - name: pxPorCm
+        type: decimal
+        description: Escala para medidas reales
+        precision: 8
+        scale: 3
+      - name: intensidadDesplazamiento
+        type: decimal
+        defaultValue: "0.6"
+        precision: 4
+        scale: 2
+      - name: usoIaGenerativa
+        type: boolean
+        defaultValue: "false"
+      - name: analisisIa
+        type: json
+      - name: notas
+        type: text
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+    stateMachine:
+      field: estado
+      initial: BORRADOR
+      states:
+        - name: BORRADOR
+          label: Borrador
+        - name: PROCESANDO
+          label: Procesando
+        - name: EN_REVISION
+          label: En revisión
+        - name: LISTA
+          label: Lista
+        - name: RECHAZADA
+          label: Rechazada
+        - name: ARCHIVADA
+          label: Archivada
+          isFinal: true
+      transitions:
+        - from: [BORRADOR, RECHAZADA]
+          to: PROCESANDO
+          action: procesar
+          event: base-mockup.procesando
+          roles: [propietario]
+        - from: [PROCESANDO]
+          to: EN_REVISION
+          action: terminarProceso
+          event: base-mockup.procesada
+        - from: [PROCESANDO]
+          to: BORRADOR
+          action: marcarError
+          event: base-mockup.proceso-fallido
+        - from: [EN_REVISION]
+          to: LISTA
+          action: aprobar
+          event: base-mockup.lista
+          guard: imagenRecorte != null && mapaDesplazamiento != null && zonas.Count > 0
+          roles: [propietario]
+        - from: [EN_REVISION]
+          to: RECHAZADA
+          action: rechazar
+          event: base-mockup.rechazada
+          roles: [propietario]
+        - from: [LISTA]
+          to: EN_REVISION
+          action: reabrir
+          event: base-mockup.reabierta
+          roles: [propietario]
+        - from: [LISTA, RECHAZADA, BORRADOR]
+          to: ARCHIVADA
+          action: archivar
+          event: base-mockup.archivada
+          roles: [propietario]
+  - slug: zona-base
+    name: ZonaBase
+    description: Ubicación de una zona de impresión dentro de la foto (malla de puntos).
+    icon: TableChart
+    tableName: zonas_base
+    scope: global
+    fields:
+      - name: baseMockupId
+        type: uuid
+        isRequired: true
+      - name: zonaImpresionId
+        type: uuid
+      - name: nombre
+        type: string
+        maxLength: 80
+        isRequired: true
+      - name: puntos
+        type: json
+        description: Cuatro esquinas o malla para deformación
+        isRequired: true
+      - name: rotacionGrados
+        type: decimal
+        defaultValue: "0"
+        precision: 6
+        scale: 2
+      - name: curvatura
+        type: decimal
+        defaultValue: "0"
+        precision: 4
+        scale: 2
+      - name: origen
+        type: enum
+        defaultValue: MANUAL
+        enumValues: [MANUAL, IA]
+      - name: confianzaIa
+        type: percentage
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+  - slug: escena
+    name: Escena
+    description: Fondo y ambiente del mockup.
+    icon: TableChart
+    tableName: escenas
+    scope: global
+    softDelete: true
+    fields:
+      - name: nombre
+        type: string
+        maxLength: 100
+        isRequired: true
+      - name: tipo
+        type: enum
+        defaultValue: COLOR_SOLIDO
+        enumValues: [TRANSPARENTE, COLOR_SOLIDO, DEGRADADO, IMAGEN, GENERADA_IA]
+      - name: colorFondo
+        type: color
+      - name: colorFondo2
+        type: color
+      - name: imagenFondo
+        type: image
+      - name: sombraSuelo
+        type: boolean
+        defaultValue: "true"
+      - name: configuracion
+        type: json
+        description: Posición, escala, luz y desenfoque
+      - name: activa
+        type: boolean
+        defaultValue: "true"
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+screens:
+  - name: Bases
+    type: List
+    route: /bases
+    menuLabel: BASES
+    menuIcon: Image
+    entity: bases.base-mockup
+  - name: Nueva base
+    type: Wizard
+    route: /bases/nueva
+    menuLabel: Nueva base
+    menuIcon: AddPhotoAlternate
+    entity: bases.base-mockup
+  - name: Editor de base
+    type: Detail
+    route: /bases/:id
+    menuLabel: Editor de base
+    menuIcon: Tune
+    entity: bases.base-mockup
+  - name: Escenas
+    type: List
+    route: /bases/escenas
+    menuLabel: Escenas
+    menuIcon: Wallpaper
+    entity: bases.escena
+  - name: Escena
+    type: Form
+    route: /bases/escenas/:id
+    menuLabel: Escena
+    menuIcon: Wallpaper
+    entity: bases.escena
+apis:
+  - name: Listar bases
+    method: GET
+    path: /api/bases
+    tags: [bases]
+    entity: bases.base-mockup
+  - name: Subir base
+    method: POST
+    path: /api/bases
+    description: Multipart; también acepta imagen de color del proveedor
+    tags: [bases]
+    entity: bases.base-mockup
+  - name: Obtener base
+    method: GET
+    path: /api/bases/{id}
+    tags: [bases]
+    entity: bases.base-mockup
+  - name: Editar base
+    method: PUT
+    path: /api/bases/{id}
+    tags: [bases]
+    entity: bases.base-mockup
+  - name: Procesar base
+    method: POST
+    path: /api/bases/{id}/procesar
+    description: Recorte local, máscara y mapas
+    tags: [bases]
+    entity: bases.base-mockup
+  - name: Limpiar con IA
+    method: POST
+    path: /api/bases/{id}/ia/limpiar
+    description: "Gemini: limpiar, enderezar o quitar arrugas"
+    tags: [bases, ia]
+    entity: bases.base-mockup
+  - name: Generar base con IA
+    method: POST
+    path: /api/bases/ia/generar
+    description: Gemini crea base blanca de una prenda nueva
+    tags: [bases, ia]
+    entity: bases.base-mockup
+  - name: Analizar con IA
+    method: POST
+    path: /api/bases/{id}/ia/analizar
+    description: "Claude: tipo, vista, zonas y calidad"
+    tags: [bases, ia]
+    entity: bases.base-mockup
+  - name: Guardar zonas
+    method: PUT
+    path: /api/bases/{id}/zonas
+    tags: [bases]
+    entity: bases.zona-base
+  - name: Aprobar base
+    method: POST
+    path: /api/bases/{id}/aprobar
+    tags: [bases]
+    entity: bases.base-mockup
+  - name: Rechazar base
+    method: POST
+    path: /api/bases/{id}/rechazar
+    tags: [bases]
+    entity: bases.base-mockup
+  - name: Archivar base
+    method: POST
+    path: /api/bases/{id}/archivar
+    tags: [bases]
+    entity: bases.base-mockup
+  - name: Listar escenas
+    method: GET
+    path: /api/escenas
+    tags: [bases]
+    entity: bases.escena
+  - name: Guardar escena
+    method: PUT
+    path: /api/escenas/{id}
+    tags: [bases]
+    entity: bases.escena
+  - name: Generar escena con IA
+    method: POST
+    path: /api/escenas/ia/generar
+    tags: [bases, ia]
+    entity: bases.escena
+workflows:
+  - name: Preparar base de mockup
+    description: De la foto subida a una base lista para recibir diseños.
+    trigger: base-mockup.procesando
+    steps:
+      - type: trigger
+        label: Base enviada a procesar
+        config:
+          event: base-mockup.procesando
+      - type: condition
+        label: ¿Limpiar con Gemini?
+        config:
+          condition: usoIaGenerativa == true
+      - type: ai
+        label: Limpiar y enderezar con Gemini
+        config:
+          model: gemini-nano-banana-2.1
+          prompt: LIMPIAR_BASE
+      - type: approval
+        label: Aprobar imagen editada
+        config:
+          approverRole: propietario
+      - type: action
+        label: Recortar con BiRefNet
+        config:
+          service: BackgroundRemovalService
+      - type: action
+        label: Generar máscara y mapas
+        config:
+          service: DisplacementMapService
+      - type: ai
+        label: Detectar zonas con Claude
+        config:
+          model: claude-sonnet-5-5
+          prompt: DETECTAR_ZONAS
+      - type: action
+        label: Pasar a revisión
+        config:
+          service: BaseMockup.terminarProceso
+      - type: notification
+        label: Avisar base lista para revisar
+        config:
+          channel: toast-windows
+      - type: end
+        label: Fin
+    nodes:
+      - key: base-enviada-a-procesar
+        type: start
+        label: Base enviada a procesar
+        position: {x: 0, y: 0}
+      - key: limpiar-con-gemini
+        type: decision
+        label: ¿Limpiar con Gemini?
+        position: {x: 240, y: 0}
+      - key: limpiar-y-enderezar-con-gemini
+        type: action
+        label: Limpiar y enderezar con Gemini
+        position: {x: 480, y: 0}
+      - key: aprobar-imagen-editada
+        type: approval
+        label: Aprobar imagen editada
+        position: {x: 720, y: 0}
+      - key: recortar-con-bi-ref-net
+        type: action
+        label: Recortar con BiRefNet
+        position: {x: 960, y: 0}
+      - key: generar-mascara-y-mapas
+        type: action
+        label: Generar máscara y mapas
+        position: {x: 1200, y: 0}
+      - key: detectar-zonas-con-claude
+        type: action
+        label: Detectar zonas con Claude
+        position: {x: 1440, y: 0}
+      - key: pasar-a-revision
+        type: action
+        label: Pasar a revisión
+        position: {x: 1680, y: 0}
+      - key: avisar-base-lista-para-revisar
+        type: action
+        label: Avisar base lista para revisar
+        position: {x: 1920, y: 0}
+      - key: fin
+        type: end
+        label: Fin
+        position: {x: 2160, y: 0}
+    edges:
+      - from: base-enviada-a-procesar
+        to: limpiar-con-gemini
+      - from: limpiar-con-gemini
+        to: limpiar-y-enderezar-con-gemini
+        label: sí
+      - from: limpiar-con-gemini
+        to: recortar-con-bi-ref-net
+        label: no
+      - from: limpiar-y-enderezar-con-gemini
+        to: aprobar-imagen-editada
+      - from: aprobar-imagen-editada
+        to: recortar-con-bi-ref-net
+      - from: recortar-con-bi-ref-net
+        to: generar-mascara-y-mapas
+      - from: generar-mascara-y-mapas
+        to: detectar-zonas-con-claude
+      - from: detectar-zonas-con-claude
+        to: pasar-a-revision
+      - from: pasar-a-revision
+        to: avisar-base-lista-para-revisar
+      - from: avisar-base-lista-para-revisar
+        to: fin
+events:
+  - name: base-mockup.procesando
+    trigger: on_state_change
+    action: trigger_workflow
+    entity: bases.base-mockup
+  - name: base-mockup.procesada
+    trigger: on_state_change
+    action: send_notification
+    entity: bases.base-mockup
+  - name: base-mockup.proceso-fallido
+    trigger: on_state_change
+    action: send_notification
+    entity: bases.base-mockup
+  - name: base-mockup.lista
+    trigger: on_state_change
+    action: log
+    entity: bases.base-mockup
+reports:
+  - name: Bases por estado
+    columns: [nombre, categoria, vista, origen, colorBase, estado]
+    filters: [estado, categoria, vista, modeloPrendaId]
+    entity: bases.base-mockup

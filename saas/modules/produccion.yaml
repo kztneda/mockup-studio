@@ -1,0 +1,311 @@
+# yaml-language-server: $schema=../schema/module.schema.json
+# SaaS Pack v2.0.0 · Mockup Studio · Módulo: entidades, pantallas, APIs, workflows, eventos y reportes
+# Valores válidos en CATALOG.md · Formato y referencias en README.md
+
+kind: module
+slug: produccion
+name: Producción
+description: Archivos de producción por zona y grupo de talla y paquetes para el maquilador.
+icon: Print
+color: "#14B8A6"
+order: 7
+phase: 1
+entities:
+  - slug: archivo-produccion
+    name: ArchivoProduccion
+    description: Arte a tamaño real por zona y grupo de talla.
+    icon: TableChart
+    tableName: archivos_produccion
+    scope: global
+    indexes:
+      - fields: [composicionId, zonaImpresionId, grupoTallaId, formato]
+        unique: true
+    fields:
+      - name: composicionId
+        type: uuid
+        isRequired: true
+      - name: zonaImpresionId
+        type: uuid
+        isRequired: true
+      - name: grupoTallaId
+        type: uuid
+        isRequired: true
+      - name: formato
+        type: enum
+        enumValues: [PDF_VECTORIAL, PNG_300DPI, SVG]
+        isRequired: true
+      - name: anchoCm
+        type: decimal
+        precision: 7
+        scale: 2
+      - name: altoCm
+        type: decimal
+        precision: 7
+        scale: 2
+      - name: dpi
+        type: smallint
+        defaultValue: "300"
+      - name: archivo
+        type: file
+      - name: hashSha256
+        type: char
+        maxLength: 64
+      - name: estado
+        type: enum
+        defaultValue: PENDIENTE
+        enumValues: [PENDIENTE, GENERADO, FALLIDO, OBSOLETO]
+      - name: error
+        type: text
+      - name: generadoEn
+        type: datetime
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+    stateMachine:
+      field: estado
+      initial: PENDIENTE
+      states:
+        - name: PENDIENTE
+          label: Pendiente
+        - name: GENERADO
+          label: Generado
+        - name: FALLIDO
+          label: Fallido
+        - name: OBSOLETO
+          label: Obsoleto
+      transitions:
+        - from: [PENDIENTE, OBSOLETO, FALLIDO]
+          to: GENERADO
+          action: generar
+          event: archivo-produccion.generado
+        - from: [PENDIENTE, OBSOLETO]
+          to: FALLIDO
+          action: fallar
+          event: archivo-produccion.fallido
+        - from: [GENERADO]
+          to: OBSOLETO
+          action: invalidar
+          event: archivo-produccion.obsoleto
+          description: La composición cambió
+  - slug: paquete-produccion
+    name: PaqueteProduccion
+    description: ZIP para el maquilador con archivos, mockups de referencia y ficha.
+    icon: TableChart
+    tableName: paquetes_produccion
+    scope: global
+    fields:
+      - name: composicionId
+        type: uuid
+        isRequired: true
+      - name: cotizacionCostoId
+        type: uuid
+      - name: nombre
+        type: string
+        maxLength: 150
+        isRequired: true
+      - name: incluyeMockups
+        type: boolean
+        defaultValue: "true"
+      - name: notasMaquilador
+        type: text
+      - name: fichaPdf
+        type: file
+        description: Ficha con medidas por talla, tintas, técnica y corrida
+      - name: archivoZip
+        type: file
+      - name: estado
+        type: enum
+        defaultValue: BORRADOR
+        enumValues: [BORRADOR, GENERADO, ENVIADO]
+      - name: enviadoEn
+        type: datetime
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+    stateMachine:
+      field: estado
+      initial: BORRADOR
+      states:
+        - name: BORRADOR
+          label: Borrador
+        - name: GENERADO
+          label: Generado
+        - name: ENVIADO
+          label: Enviado
+          isFinal: true
+      transitions:
+        - from: [BORRADOR, GENERADO]
+          to: GENERADO
+          action: generar
+          event: paquete-produccion.generado
+          roles: [propietario]
+        - from: [GENERADO]
+          to: ENVIADO
+          action: marcarEnviado
+          event: paquete-produccion.enviado
+          roles: [propietario]
+screens:
+  - name: Archivos de producción
+    type: List
+    route: /produccion/archivos
+    menuLabel: PRODUCCIÓN
+    menuIcon: Print
+    entity: produccion.archivo-produccion
+  - name: Paquetes
+    type: List
+    route: /produccion/paquetes
+    menuLabel: Paquetes
+    menuIcon: Inventory2
+    entity: produccion.paquete-produccion
+  - name: Paquete
+    type: Detail
+    route: /produccion/paquetes/:id
+    menuLabel: Paquete
+    menuIcon: Inventory2
+    entity: produccion.paquete-produccion
+apis:
+  - name: Generar archivos
+    method: POST
+    path: /api/composiciones/{id}/archivos-produccion
+    description: Por zona, grupo de talla y formatos elegidos
+    tags: [produccion]
+    entity: produccion.archivo-produccion
+  - name: Listar archivos
+    method: GET
+    path: /api/composiciones/{id}/archivos-produccion
+    tags: [produccion]
+    entity: produccion.archivo-produccion
+  - name: Descargar archivo
+    method: GET
+    path: /api/archivos-produccion/{id}/descargar
+    tags: [produccion]
+    entity: produccion.archivo-produccion
+  - name: Crear paquete
+    method: POST
+    path: /api/paquetes-produccion
+    tags: [produccion]
+    entity: produccion.paquete-produccion
+  - name: Generar paquete
+    method: POST
+    path: /api/paquetes-produccion/{id}/generar
+    tags: [produccion]
+    entity: produccion.paquete-produccion
+  - name: Marcar enviado
+    method: POST
+    path: /api/paquetes-produccion/{id}/enviado
+    tags: [produccion]
+    entity: produccion.paquete-produccion
+  - name: Descargar paquete
+    method: GET
+    path: /api/paquetes-produccion/{id}/zip
+    tags: [produccion]
+    entity: produccion.paquete-produccion
+workflows:
+  - name: Generar archivos de producción
+    description: Escala cada capa por grupo de talla y exporta en el formato adecuado.
+    trigger: manual
+    steps:
+      - type: trigger
+        label: Solicitud manual
+        config:
+          event: manual
+      - type: loop
+        label: Por zona y grupo de talla
+        config:
+          items: zonas x gruposTalla
+      - type: condition
+        label: ¿Cabe en el área máxima?
+        config:
+          condition: anchoCm <= anchoMaxCm && altoCm <= altoMaxCm
+      - type: condition
+        label: ¿Todas las capas son vectoriales?
+        config:
+          condition: capas.All(esVectorial)
+      - type: action
+        label: Exportar PDF vectorial
+        config:
+          service: PdfProduccionService
+      - type: action
+        label: Exportar PNG 300 DPI
+        config:
+          service: PngProduccionService
+      - type: notification
+        label: Avisar que excede el área
+        config:
+          channel: in-app
+      - type: end
+        label: Fin
+    nodes:
+      - key: solicitud-manual
+        type: start
+        label: Solicitud manual
+        position: {x: 0, y: 0}
+      - key: por-zona-y-grupo-de-talla
+        type: action
+        label: Por zona y grupo de talla
+        position: {x: 240, y: 0}
+      - key: cabe-en-el-area-maxima
+        type: decision
+        label: ¿Cabe en el área máxima?
+        position: {x: 480, y: 0}
+      - key: todas-las-capas-son-vectoriales
+        type: decision
+        label: ¿Todas las capas son vectoriales?
+        position: {x: 720, y: 0}
+      - key: exportar-pdf-vectorial
+        type: action
+        label: Exportar PDF vectorial
+        position: {x: 960, y: 0}
+      - key: exportar-png-300-dpi
+        type: action
+        label: Exportar PNG 300 DPI
+        position: {x: 960, y: 120}
+      - key: avisar-que-excede-el-area
+        type: action
+        label: Avisar que excede el área
+        position: {x: 720, y: 120}
+      - key: fin
+        type: end
+        label: Fin
+        position: {x: 1200, y: 0}
+    edges:
+      - from: solicitud-manual
+        to: por-zona-y-grupo-de-talla
+      - from: por-zona-y-grupo-de-talla
+        to: cabe-en-el-area-maxima
+      - from: cabe-en-el-area-maxima
+        to: todas-las-capas-son-vectoriales
+        label: sí
+      - from: cabe-en-el-area-maxima
+        to: avisar-que-excede-el-area
+        label: no
+      - from: todas-las-capas-son-vectoriales
+        to: exportar-pdf-vectorial
+        label: sí
+      - from: todas-las-capas-son-vectoriales
+        to: exportar-png-300-dpi
+        label: no
+      - from: exportar-pdf-vectorial
+        to: fin
+      - from: exportar-png-300-dpi
+        to: fin
+      - from: avisar-que-excede-el-area
+        to: fin
+events:
+  - name: archivo-produccion.obsoleto
+    trigger: on_state_change
+    action: send_notification
+    entity: produccion.archivo-produccion
+  - name: paquete-produccion.enviado
+    trigger: on_state_change
+    action: log
+    entity: produccion.paquete-produccion
+reports:
+  - name: Archivos obsoletos
+    columns: [composicionId, zonaImpresionId, grupoTallaId, formato]
+    filters: [composicionId]
+    conditions:
+      - field: estado
+        operator: eq
+        value: OBSOLETO
+    entity: produccion.archivo-produccion

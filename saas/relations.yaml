@@ -1,0 +1,436 @@
+# yaml-language-server: $schema=schema/relations.schema.json
+# SaaS Pack v2.0.0 · Mockup Studio · Relaciones entre entidades (source/target: "<modulo>.<entidad>")
+# Valores válidos en CATALOG.md · Formato y referencias en README.md
+
+kind: relations
+relations:
+  - source: sistema.actividad
+    target: sistema.trabajo
+    type: ManyToOne
+    sourceField: trabajoId
+    label: trabajo
+  - source: sistema.marca
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: sistema.parametro
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: sistema.trabajo
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: sistema.respaldo
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: ia.prompt-plantilla
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: ia.consumo-ia
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: ia.consumo-ia
+    target: ia.prompt-plantilla
+    type: ManyToOne
+    sourceField: promptPlantillaId
+    label: plantilla
+  - source: ia.consumo-ia
+    target: sistema.trabajo
+    type: ManyToOne
+    sourceField: trabajoId
+    label: trabajo
+  - source: ia.contenido-generado
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: ia.contenido-generado
+    target: sistema.marca
+    type: ManyToOne
+    sourceField: marcaId
+    label: marca
+  - source: ia.contenido-generado
+    target: disenos.diseno
+    type: ManyToOne
+    sourceField: disenoId
+    label: diseno
+  - source: ia.contenido-generado
+    target: ia.consumo-ia
+    type: ManyToOne
+    sourceField: consumoIaId
+    label: consumo
+  - source: catalogo.proveedor
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: catalogo.modelo-prenda
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: catalogo.modelo-prenda
+    target: catalogo.proveedor
+    type: ManyToOne
+    sourceField: proveedorId
+    label: proveedor
+  - source: catalogo.color-prenda
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: catalogo.color-prenda
+    target: catalogo.modelo-prenda
+    type: ManyToOne
+    sourceField: modeloPrendaId
+    label: modelo
+  - source: catalogo.grupo-talla
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: catalogo.escalon-precio-proveedor
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: catalogo.escalon-precio-proveedor
+    target: catalogo.modelo-prenda
+    type: ManyToOne
+    sourceField: modeloPrendaId
+    label: modelo
+  - source: catalogo.zona-impresion
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: catalogo.zona-impresion
+    target: catalogo.modelo-prenda
+    type: ManyToOne
+    sourceField: modeloPrendaId
+    label: modelo
+  - source: catalogo.area-impresion
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: catalogo.area-impresion
+    target: catalogo.zona-impresion
+    type: ManyToOne
+    sourceField: zonaImpresionId
+    label: zona
+  - source: catalogo.area-impresion
+    target: catalogo.grupo-talla
+    type: ManyToOne
+    sourceField: grupoTallaId
+    label: grupoTalla
+  - source: bases.base-mockup
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: bases.base-mockup
+    target: catalogo.modelo-prenda
+    type: ManyToOne
+    sourceField: modeloPrendaId
+    label: modelo
+  - source: bases.base-mockup
+    target: catalogo.color-prenda
+    type: ManyToOne
+    sourceField: colorPrendaId
+    label: colorFijo
+  - source: bases.zona-base
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: bases.zona-base
+    target: bases.base-mockup
+    type: ManyToOne
+    sourceField: baseMockupId
+    label: base
+  - source: bases.zona-base
+    target: catalogo.zona-impresion
+    type: ManyToOne
+    sourceField: zonaImpresionId
+    label: zona
+  - source: bases.escena
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: disenos.diseno
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: disenos.diseno
+    target: sistema.marca
+    type: ManyToOne
+    sourceField: marcaId
+    label: marca
+  - source: disenos.arte
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: disenos.arte
+    target: disenos.diseno
+    type: ManyToOne
+    sourceField: disenoId
+    label: diseno
+  - source: disenos.fuente
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: disenos.composicion
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: disenos.composicion
+    target: disenos.diseno
+    type: ManyToOne
+    sourceField: disenoId
+    label: diseno
+  - source: disenos.composicion
+    target: catalogo.modelo-prenda
+    type: ManyToOne
+    sourceField: modeloPrendaId
+    label: modelo
+  - source: disenos.capa-composicion
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: disenos.capa-composicion
+    target: disenos.composicion
+    type: ManyToOne
+    sourceField: composicionId
+    label: composicion
+  - source: disenos.capa-composicion
+    target: catalogo.zona-impresion
+    type: ManyToOne
+    sourceField: zonaImpresionId
+    label: zona
+  - source: disenos.capa-composicion
+    target: disenos.arte
+    type: ManyToOne
+    sourceField: arteId
+    label: arte
+  - source: disenos.capa-composicion
+    target: disenos.fuente
+    type: ManyToOne
+    sourceField: fuenteId
+    label: fuente
+  - source: disenos.capa-composicion
+    target: catalogo.grupo-talla
+    type: ManyToOne
+    sourceField: grupoTallaBaseId
+    label: grupoTallaBase
+  - source: mockups.perfil-exportacion
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: mockups.perfil-exportacion
+    target: bases.escena
+    type: ManyToOne
+    sourceField: escenaId
+    label: escena
+  - source: mockups.lote
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: mockups.lote
+    target: sistema.marca
+    type: ManyToOne
+    sourceField: marcaId
+    label: marca
+  - source: mockups.lote-item
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: mockups.lote-item
+    target: mockups.lote
+    type: ManyToOne
+    sourceField: loteId
+    label: lote
+  - source: mockups.lote-item
+    target: disenos.composicion
+    type: ManyToOne
+    sourceField: composicionId
+    label: composicion
+  - source: mockups.lote-item
+    target: bases.base-mockup
+    type: ManyToOne
+    sourceField: baseMockupId
+    label: base
+  - source: mockups.lote-item
+    target: catalogo.color-prenda
+    type: ManyToOne
+    sourceField: colorPrendaId
+    label: color
+  - source: mockups.lote-item
+    target: bases.escena
+    type: ManyToOne
+    sourceField: escenaId
+    label: escena
+  - source: mockups.lote-item
+    target: mockups.perfil-exportacion
+    type: ManyToOne
+    sourceField: perfilExportacionId
+    label: perfil
+  - source: produccion.archivo-produccion
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: produccion.archivo-produccion
+    target: disenos.composicion
+    type: ManyToOne
+    sourceField: composicionId
+    label: composicion
+  - source: produccion.archivo-produccion
+    target: catalogo.zona-impresion
+    type: ManyToOne
+    sourceField: zonaImpresionId
+    label: zona
+  - source: produccion.archivo-produccion
+    target: catalogo.grupo-talla
+    type: ManyToOne
+    sourceField: grupoTallaId
+    label: grupoTalla
+  - source: produccion.paquete-produccion
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: produccion.paquete-produccion
+    target: disenos.composicion
+    type: ManyToOne
+    sourceField: composicionId
+    label: composicion
+  - source: produccion.paquete-produccion
+    target: costos.cotizacion-costo
+    type: ManyToOne
+    sourceField: cotizacionCostoId
+    label: cotizacion
+  - source: costos.tarifa-maquila
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: costos.tarifa-maquila
+    target: catalogo.proveedor
+    type: ManyToOne
+    sourceField: proveedorId
+    label: maquilador
+  - source: costos.tarifa-maquila
+    target: catalogo.modelo-prenda
+    type: ManyToOne
+    sourceField: modeloPrendaId
+    label: modelo
+  - source: costos.costo-adicional
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: costos.costo-adicional
+    target: catalogo.proveedor
+    type: ManyToOne
+    sourceField: proveedorId
+    label: proveedor
+  - source: costos.cotizacion-costo
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: costos.cotizacion-costo
+    target: sistema.marca
+    type: ManyToOne
+    sourceField: marcaId
+    label: marca
+  - source: costos.cotizacion-costo
+    target: disenos.diseno
+    type: ManyToOne
+    sourceField: disenoId
+    label: diseno
+  - source: costos.cotizacion-costo
+    target: disenos.composicion
+    type: ManyToOne
+    sourceField: composicionId
+    label: composicion
+  - source: costos.cotizacion-costo
+    target: catalogo.proveedor
+    type: ManyToOne
+    sourceField: proveedorId
+    label: maquilador
+  - source: costos.cotizacion-costo
+    target: costos.tarifa-maquila
+    type: ManyToOne
+    sourceField: tarifaMaquilaId
+    label: tarifa
+  - source: costos.cotizacion-partida
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: costos.cotizacion-partida
+    target: costos.cotizacion-costo
+    type: ManyToOne
+    sourceField: cotizacionCostoId
+    label: cotizacion
+  - source: costos.cotizacion-partida
+    target: catalogo.color-prenda
+    type: ManyToOne
+    sourceField: colorPrendaId
+    label: color
+  - source: costos.cotizacion-partida
+    target: catalogo.grupo-talla
+    type: ManyToOne
+    sourceField: grupoTallaId
+    label: grupoTalla
+  - source: modelos-3d.modelo-3d
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: modelos-3d.modelo-3d
+    target: catalogo.modelo-prenda
+    type: ManyToOne
+    sourceField: modeloPrendaId
+    label: modelo
+  - source: modelos-3d.pieza-patron
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad
+  - source: modelos-3d.pieza-patron
+    target: modelos-3d.modelo-3d
+    type: ManyToOne
+    sourceField: modelo3dId
+    label: modelo3d
+  - source: modelos-3d.pieza-patron
+    target: catalogo.zona-impresion
+    type: ManyToOne
+    sourceField: zonaImpresionId
+    label: zona
+  - source: modelos-3d.material-tela
+    target: sistema.actividad
+    type: ManyToOne
+    sourceField: ultimaActividadId
+    label: ultimaActividad

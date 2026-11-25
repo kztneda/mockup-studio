@@ -1,0 +1,232 @@
+# yaml-language-server: $schema=../schema/module.schema.json
+# SaaS Pack v2.0.0 · Mockup Studio · Módulo: entidades, pantallas, APIs, workflows, eventos y reportes
+# Valores válidos en CATALOG.md · Formato y referencias en README.md
+
+kind: module
+slug: modelos-3d
+name: Modelos 3D
+description: "Fase 2: modelos .glb por prenda hechos en Marvelous Designer, piezas del patrón de corte y materiales de tela para el visor 3D, GIF y video 360."
+icon: ViewInAr
+color: "#6366F1"
+order: 9
+phase: 2
+entities:
+  - slug: modelo-3d
+    name: Modelo3d
+    description: Modelo 3D con UV de un modelo de prenda.
+    icon: TableChart
+    tableName: modelos_3d
+    scope: global
+    softDelete: true
+    fields:
+      - name: modeloPrendaId
+        type: uuid
+        isRequired: true
+      - name: version
+        type: string
+        maxLength: 20
+        isRequired: true
+      - name: fuente
+        type: enum
+        enumValues: [MARVELOUS_DESIGNER, CLO3D, COMPRADO, OTRO]
+        isRequired: true
+      - name: archivoGlb
+        type: file
+        isRequired: true
+      - name: archivoFuente
+        type: file
+        description: Proyecto .zprj o similar
+      - name: escalaCm
+        type: decimal
+        defaultValue: "1"
+        precision: 8
+        scale: 4
+      - name: estado
+        type: enum
+        defaultValue: BORRADOR
+        enumValues: [BORRADOR, EN_PRUEBA, LISTO, ARCHIVADO]
+      - name: notas
+        type: text
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+    stateMachine:
+      field: estado
+      initial: BORRADOR
+      states:
+        - name: BORRADOR
+          label: Borrador
+        - name: EN_PRUEBA
+          label: En prueba
+        - name: LISTO
+          label: Listo
+        - name: ARCHIVADO
+          label: Archivado
+          isFinal: true
+      transitions:
+        - from: [BORRADOR]
+          to: EN_PRUEBA
+          action: probar
+          event: modelo-3d.en-prueba
+          guard: UV válido y piezas mapeadas
+          roles: [propietario]
+        - from: [EN_PRUEBA]
+          to: LISTO
+          action: aprobar
+          event: modelo-3d.listo
+          roles: [propietario]
+        - from: [EN_PRUEBA, LISTO]
+          to: BORRADOR
+          action: reabrir
+          event: modelo-3d.reabierto
+          roles: [propietario]
+        - from: [BORRADOR, EN_PRUEBA, LISTO]
+          to: ARCHIVADO
+          action: archivar
+          event: modelo-3d.archivado
+          roles: [propietario]
+  - slug: pieza-patron
+    name: PiezaPatron
+    description: Pieza del patrón de corte con su región UV.
+    icon: TableChart
+    tableName: piezas_patron
+    scope: global
+    fields:
+      - name: modelo3dId
+        type: uuid
+        isRequired: true
+      - name: nombre
+        type: string
+        maxLength: 80
+        isRequired: true
+      - name: zonaImpresionId
+        type: uuid
+      - name: anchoCm
+        type: decimal
+        precision: 7
+        scale: 2
+      - name: altoCm
+        type: decimal
+        precision: 7
+        scale: 2
+      - name: cortes
+        type: smallint
+        defaultValue: "1"
+      - name: regionUv
+        type: json
+        isRequired: true
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+  - slug: material-tela
+    name: MaterialTela
+    description: Textura y parámetros de tela para render 3D.
+    icon: TableChart
+    tableName: materiales_tela
+    scope: global
+    fields:
+      - name: nombre
+        type: string
+        maxLength: 80
+        isRequired: true
+      - name: tipo
+        type: enum
+        enumValues: [ALGODON, POLIESTER, MEZCLA, FELPA, JASPEADO, GARMENT_DYE]
+        isRequired: true
+      - name: mapaNormal
+        type: image
+      - name: rugosidad
+        type: decimal
+        defaultValue: "0.8"
+        precision: 4
+        scale: 2
+      - name: tamanoTejido
+        type: decimal
+        defaultValue: "3"
+        precision: 5
+        scale: 2
+      - name: arrugas
+        type: decimal
+        defaultValue: "0.5"
+        precision: 4
+        scale: 2
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+screens:
+  - name: Modelos 3D
+    type: List
+    route: /modelos-3d
+    menuLabel: 3D
+    menuIcon: ViewInAr
+    entity: modelos-3d.modelo-3d
+  - name: Visor 3D
+    type: custom:Visor3D
+    route: /modelos-3d/:id
+    menuLabel: Visor 3D
+    menuIcon: ThreeDRotation
+    entity: modelos-3d.modelo-3d
+  - name: Patrón de corte
+    type: Detail
+    route: /modelos-3d/:id/patron
+    menuLabel: Patrón de corte
+    menuIcon: ContentCut
+    entity: modelos-3d.pieza-patron
+  - name: Materiales de tela
+    type: List
+    route: /modelos-3d/materiales
+    menuLabel: Materiales
+    menuIcon: Texture
+    entity: modelos-3d.material-tela
+apis:
+  - name: Listar modelos 3D
+    method: GET
+    path: /api/modelos-3d
+    tags: [modelos-3d]
+    entity: modelos-3d.modelo-3d
+  - name: Subir modelo 3D
+    method: POST
+    path: /api/modelos-3d
+    description: Multipart .glb; extrae piezas y UV
+    tags: [modelos-3d]
+    entity: modelos-3d.modelo-3d
+  - name: Validar modelo 3D
+    method: POST
+    path: /api/modelos-3d/{id}/validar
+    tags: [modelos-3d]
+    entity: modelos-3d.modelo-3d
+  - name: Cambiar estado del modelo 3D
+    method: POST
+    path: /api/modelos-3d/{id}/{accion}
+    tags: [modelos-3d]
+    entity: modelos-3d.modelo-3d
+  - name: Guardar piezas
+    method: PUT
+    path: /api/modelos-3d/{id}/piezas
+    tags: [modelos-3d]
+    entity: modelos-3d.pieza-patron
+  - name: Exportar patrón
+    method: GET
+    path: /api/modelos-3d/{id}/patron.pdf
+    tags: [modelos-3d]
+    entity: modelos-3d.pieza-patron
+  - name: Listar materiales
+    method: GET
+    path: /api/materiales-tela
+    tags: [modelos-3d]
+    entity: modelos-3d.material-tela
+  - name: Guardar material
+    method: PUT
+    path: /api/materiales-tela/{id}
+    tags: [modelos-3d]
+    entity: modelos-3d.material-tela
+events:
+  - name: modelo-3d.listo
+    trigger: on_state_change
+    action: log
+    entity: modelos-3d.modelo-3d
+reports:
+  - name: Modelos 3D por prenda
+    columns: [modeloPrendaId, version, fuente, estado]
+    filters: [estado, fuente]
+    entity: modelos-3d.modelo-3d

@@ -1,0 +1,274 @@
+# yaml-language-server: $schema=../schema/module.schema.json
+# SaaS Pack v2.0.0 · Mockup Studio · Módulo: entidades, pantallas, APIs, workflows, eventos y reportes
+# Valores válidos en CATALOG.md · Formato y referencias en README.md
+
+kind: module
+slug: ia
+name: Inteligencia artificial
+description: Plantillas de prompts, consumo y costo de Anthropic y Gemini, y contenido de texto generado.
+icon: AutoAwesome
+color: "#A855F7"
+order: 2
+phase: 1
+entities:
+  - slug: prompt-plantilla
+    name: PromptPlantilla
+    description: Prompts versionados y editables por operación.
+    icon: TableChart
+    tableName: prompt_plantillas
+    scope: global
+    audited: true
+    fields:
+      - name: clave
+        type: slug
+        maxLength: 80
+        isRequired: true
+        isUnique: true
+      - name: nombre
+        type: string
+        maxLength: 120
+        isRequired: true
+      - name: proveedor
+        type: enum
+        enumValues: [ANTHROPIC, GEMINI]
+        isRequired: true
+      - name: modelo
+        type: string
+        maxLength: 80
+        isRequired: true
+      - name: tipo
+        type: enum
+        enumValues:
+          - ANALIZAR_BASE
+          - DETECTAR_ZONAS
+          - REVISAR_CALIDAD
+          - LIMPIAR_BASE
+          - ENDEREZAR_PRENDA
+          - GENERAR_BASE
+          - GENERAR_ESCENA
+          - GENERAR_COPY
+        isRequired: true
+      - name: prompt
+        type: text
+        isRequired: true
+      - name: esquemaSalida
+        type: json
+        description: JSON Schema esperado en respuestas de Claude
+      - name: temperatura
+        type: decimal
+        defaultValue: "0.2"
+        precision: 3
+        scale: 2
+      - name: version
+        type: smallint
+        defaultValue: "1"
+      - name: activa
+        type: boolean
+        defaultValue: "true"
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+  - slug: consumo-ia
+    name: ConsumoIa
+    description: Registro de cada llamada a IA con costo estimado.
+    icon: TableChart
+    tableName: consumos_ia
+    scope: global
+    indexes:
+      - fields: [proveedor, operacion]
+        unique: false
+    fields:
+      - name: proveedor
+        type: enum
+        enumValues: [ANTHROPIC, GEMINI]
+        isRequired: true
+      - name: modelo
+        type: string
+        maxLength: 80
+        isRequired: true
+      - name: operacion
+        type: enum
+        enumValues:
+          - ANALIZAR_BASE
+          - DETECTAR_ZONAS
+          - REVISAR_CALIDAD
+          - LIMPIAR_BASE
+          - ENDEREZAR_PRENDA
+          - GENERAR_BASE
+          - GENERAR_ESCENA
+          - GENERAR_COPY
+        isRequired: true
+      - name: promptPlantillaId
+        type: uuid
+      - name: trabajoId
+        type: uuid
+      - name: tokensEntrada
+        type: int
+        defaultValue: "0"
+      - name: tokensSalida
+        type: int
+        defaultValue: "0"
+      - name: imagenesEntrada
+        type: smallint
+        defaultValue: "0"
+      - name: imagenesSalida
+        type: smallint
+        defaultValue: "0"
+      - name: costoEstimadoUsd
+        type: decimal
+        defaultValue: "0"
+        precision: 10
+        scale: 4
+      - name: duracionMs
+        type: int
+      - name: exitoso
+        type: boolean
+        defaultValue: "true"
+      - name: error
+        type: text
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+  - slug: contenido-generado
+    name: ContenidoGenerado
+    description: Nombres, descripciones, copys y hashtags generados con Claude (fase 2).
+    icon: TableChart
+    tableName: contenidos_generados
+    scope: global
+    fields:
+      - name: marcaId
+        type: uuid
+        isRequired: true
+      - name: disenoId
+        type: uuid
+      - name: tipo
+        type: enum
+        enumValues: [NOMBRE_PRODUCTO, DESCRIPCION_TIENDA, COPY_INSTAGRAM, HASHTAGS, TEXTO_ALT]
+        isRequired: true
+      - name: texto
+        type: text
+        isRequired: true
+      - name: estado
+        type: enum
+        defaultValue: GENERADO
+        enumValues: [GENERADO, APROBADO, DESCARTADO]
+      - name: consumoIaId
+        type: uuid
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+    stateMachine:
+      field: estado
+      initial: GENERADO
+      states:
+        - name: GENERADO
+          label: Generado
+        - name: APROBADO
+          label: Aprobado
+          isFinal: true
+        - name: DESCARTADO
+          label: Descartado
+          isFinal: true
+      transitions:
+        - from: [GENERADO]
+          to: APROBADO
+          action: aprobar
+          event: contenido-generado.aprobado
+          roles: [propietario]
+        - from: [GENERADO]
+          to: DESCARTADO
+          action: descartar
+          event: contenido-generado.descartado
+          roles: [propietario]
+screens:
+  - name: Prompts
+    type: List
+    route: /ia/prompts
+    menuLabel: Prompts
+    menuIcon: AutoAwesome
+    entity: ia.prompt-plantilla
+  - name: Prompt
+    type: Form
+    route: /ia/prompts/:id
+    menuLabel: Prompt
+    menuIcon: AutoAwesome
+    entity: ia.prompt-plantilla
+  - name: Consumo de IA
+    type: Report
+    route: /ia/consumo
+    menuLabel: Consumo de IA
+    menuIcon: Paid
+    entity: ia.consumo-ia
+  - name: Contenido generado
+    type: List
+    route: /ia/contenido
+    menuLabel: Copys
+    menuIcon: Notes
+    entity: ia.contenido-generado
+apis:
+  - name: Listar prompts
+    method: GET
+    path: /api/ia/prompts
+    tags: [ia]
+    entity: ia.prompt-plantilla
+  - name: Guardar prompt
+    method: PUT
+    path: /api/ia/prompts/{id}
+    description: Incrementa versión
+    tags: [ia]
+    entity: ia.prompt-plantilla
+  - name: Probar prompt
+    method: POST
+    path: /api/ia/prompts/{id}/probar
+    tags: [ia]
+    entity: ia.prompt-plantilla
+  - name: Estimar costo
+    method: POST
+    path: /api/ia/estimar
+    description: Devuelve costo estimado antes de ejecutar una operación
+    tags: [ia]
+  - name: Consumo por periodo
+    method: GET
+    path: /api/ia/consumo
+    tags: [ia]
+    entity: ia.consumo-ia
+  - name: Generar copys
+    method: POST
+    path: /api/ia/disenos/{disenoId}/copys
+    tags: [ia]
+    entity: ia.contenido-generado
+  - name: Aprobar copy
+    method: POST
+    path: /api/ia/contenido/{id}/aprobar
+    tags: [ia]
+    entity: ia.contenido-generado
+  - name: Descartar copy
+    method: POST
+    path: /api/ia/contenido/{id}/descartar
+    tags: [ia]
+    entity: ia.contenido-generado
+events:
+  - name: consumo-ia.registrado
+    trigger: on_create
+    action: log
+    entity: ia.consumo-ia
+reports:
+  - name: Gasto de IA por proveedor
+    columns:
+      - proveedor
+      - modelo
+      - operacion
+      - tokensEntrada
+      - tokensSalida
+      - imagenesSalida
+      - costoEstimadoUsd
+    filters: [proveedor, operacion, modelo]
+    entity: ia.consumo-ia
+  - name: Llamadas fallidas
+    columns: [proveedor, operacion, error, duracionMs]
+    filters: [proveedor]
+    conditions:
+      - field: exitoso
+        operator: eq
+        value: false
+    entity: ia.consumo-ia

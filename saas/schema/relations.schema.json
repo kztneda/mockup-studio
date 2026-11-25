@@ -1,0 +1,59 @@
+{
+  "type": "object",
+  "properties": {
+    "kind": {
+      "type": "string",
+      "const": "relations"
+    },
+    "relations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "Tipo de relación. Ver CATALOG.md › RelationType.",
+            "type": "string",
+            "enum": [
+              "ManyToOne",
+              "OneToMany",
+              "OneToOne",
+              "ManyToMany"
+            ]
+          },
+          "sourceField": {
+            "type": "string",
+            "default": ""
+          },
+          "targetField": {
+            "type": "string",
+            "default": ""
+          },
+          "label": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "minLength": 1
+          },
+          "target": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "type",
+          "source",
+          "target"
+        ],
+        "additionalProperties": false
+      },
+      "default": []
+    }
+  },
+  "required": [
+    "kind"
+  ],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SaaS Pack v2.0.0 · relations"
+}

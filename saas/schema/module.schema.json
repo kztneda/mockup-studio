@@ -1,0 +1,828 @@
+{
+  "type": "object",
+  "properties": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string",
+      "default": ""
+    },
+    "icon": {
+      "type": "string",
+      "default": "Folder"
+    },
+    "color": {
+      "type": "string",
+      "default": "#1976d2"
+    },
+    "order": {
+      "type": "number",
+      "default": 0
+    },
+    "isCore": {
+      "type": "boolean",
+      "default": false
+    },
+    "phase": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9
+    },
+    "kind": {
+      "type": "string",
+      "const": "module"
+    },
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "default": ""
+          },
+          "icon": {
+            "type": "string",
+            "default": "TableChart"
+          },
+          "tableName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "position": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "x",
+              "y"
+            ],
+            "additionalProperties": false
+          },
+          "scope": {
+            "description": "Alcance de la entidad. Ver CATALOG.md › EntityScope.",
+            "type": "string",
+            "enum": [
+              "tenant",
+              "global",
+              "user"
+            ]
+          },
+          "softDelete": {
+            "type": "boolean"
+          },
+          "audited": {
+            "type": "boolean"
+          },
+          "indexes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "fields": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "minItems": 1
+                },
+                "unique": {
+                  "type": "boolean",
+                  "default": false
+                }
+              },
+              "required": [
+                "fields"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "type": {
+                  "description": "Tipo de campo. Ver CATALOG.md › FieldType.",
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "string",
+                        "text",
+                        "char",
+                        "int",
+                        "bigint",
+                        "smallint",
+                        "tinyint",
+                        "decimal",
+                        "float",
+                        "double",
+                        "boolean",
+                        "date",
+                        "time",
+                        "datetime",
+                        "timestamp",
+                        "uuid",
+                        "json",
+                        "jsonb",
+                        "blob",
+                        "enum",
+                        "array",
+                        "money",
+                        "percentage",
+                        "email",
+                        "phone",
+                        "url",
+                        "slug",
+                        "password",
+                        "richtext",
+                        "markdown",
+                        "color",
+                        "rating",
+                        "duration",
+                        "country",
+                        "currency",
+                        "locale",
+                        "ip-address",
+                        "file",
+                        "image",
+                        "geopoint"
+                      ]
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^custom:.+"
+                    }
+                  ]
+                },
+                "description": {
+                  "type": "string"
+                },
+                "isRequired": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "isNullable": {
+                  "type": "boolean",
+                  "default": true
+                },
+                "defaultValue": {
+                  "type": "string",
+                  "description": "Siempre texto, entre comillas: \"false\", \"0\", \"BORRADOR\""
+                },
+                "maxLength": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "precision": {
+                  "type": "number",
+                  "exclusiveMinimum": 0,
+                  "description": "Dígitos totales de un decimal"
+                },
+                "scale": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "description": "Dígitos decimales de un decimal (2 por defecto)"
+                },
+                "isIndexed": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "isUnique": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "enumValues": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "validation": {
+                  "type": "object",
+                  "properties": {
+                    "min": {
+                      "type": "number"
+                    },
+                    "max": {
+                      "type": "number"
+                    },
+                    "pattern": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                },
+                "sensitivity": {
+                  "description": "Sensibilidad del campo. Ver CATALOG.md › FieldSensitivity.",
+                  "type": "string",
+                  "enum": [
+                    "pii",
+                    "secret",
+                    "financial",
+                    "health"
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "type"
+              ],
+              "additionalProperties": false
+            },
+            "default": []
+          },
+          "stateMachine": {
+            "type": "object",
+            "properties": {
+              "field": {
+                "type": "string",
+                "minLength": 1
+              },
+              "initial": {
+                "type": "string",
+                "minLength": 1
+              },
+              "states": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "isFinal": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "name"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "transitions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "from": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "minItems": 1,
+                      "description": "Lista de estados de origen: [BORRADOR] (aunque sea uno solo)"
+                    },
+                    "to": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "action": {
+                      "type": "string",
+                      "description": "Comando que dispara la transición (confirmar, cancelar)"
+                    },
+                    "event": {
+                      "type": "string"
+                    },
+                    "roles": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "default": []
+                    },
+                    "guard": {
+                      "type": "string"
+                    },
+                    "description": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "from",
+                    "to"
+                  ],
+                  "additionalProperties": false
+                },
+                "default": []
+              }
+            },
+            "required": [
+              "field",
+              "initial",
+              "states"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "name",
+          "tableName"
+        ],
+        "additionalProperties": false
+      },
+      "default": []
+    },
+    "screens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "type": {
+            "description": "Tipo de pantalla. Ver CATALOG.md › ScreenType.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "Dashboard",
+                  "List",
+                  "Detail",
+                  "Form",
+                  "Wizard",
+                  "Report",
+                  "Kanban",
+                  "Calendar",
+                  "Gantt",
+                  "Timeline",
+                  "Gallery",
+                  "Tree",
+                  "Workload",
+                  "Editor",
+                  "Map",
+                  "Chat",
+                  "Settings",
+                  "Auth",
+                  "Landing",
+                  "Stack",
+                  "Tab",
+                  "Drawer",
+                  "Modal",
+                  "BottomSheet"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "route": {
+            "type": "string",
+            "minLength": 1
+          },
+          "menuLabel": {
+            "type": "string",
+            "minLength": 1
+          },
+          "menuIcon": {
+            "type": "string",
+            "default": "Article"
+          },
+          "requiredRoles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": []
+          },
+          "auth": {
+            "type": "boolean",
+            "description": "false = pantalla pública, sin sesión (por defecto true)"
+          },
+          "entity": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "route",
+          "menuLabel"
+        ],
+        "additionalProperties": false
+      },
+      "default": []
+    },
+    "apis": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nombre corto de la operación (\"Crear evento\")"
+          },
+          "controller": {
+            "type": "string"
+          },
+          "method": {
+            "description": "Método HTTP. Ver CATALOG.md › HttpMethod.",
+            "type": "string",
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "PATCH",
+              "DELETE",
+              "HEAD",
+              "OPTIONS"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^\\/"
+          },
+          "description": {
+            "type": "string",
+            "default": ""
+          },
+          "requestSchema": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "responseSchema": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "auth": {
+            "type": "boolean",
+            "default": true
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": []
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": []
+          },
+          "entity": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Entidad principal: \"<modulo>.<entidad>\" (o solo \"<entidad>\" dentro de su módulo)"
+          }
+        },
+        "required": [
+          "method",
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "default": []
+    },
+    "workflows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "default": ""
+          },
+          "trigger": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "description": "Paso de workflow. Ver CATALOG.md › WorkflowStepType.",
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "enum": [
+                        "trigger",
+                        "condition",
+                        "action",
+                        "approval",
+                        "notification",
+                        "delay",
+                        "webhook",
+                        "script",
+                        "ai",
+                        "loop",
+                        "parallel",
+                        "subworkflow",
+                        "end"
+                      ]
+                    },
+                    {
+                      "type": "string",
+                      "pattern": "^custom:.+"
+                    }
+                  ]
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "description": {
+                  "type": "string"
+                },
+                "config": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "key": {
+                  "type": "string",
+                  "minLength": 1,
+                  "description": "Identificador del paso para unirlo en edges; con key y edges el diagrama se arma solo"
+                }
+              },
+              "required": [
+                "type",
+                "label"
+              ],
+              "additionalProperties": false
+            },
+            "default": []
+          },
+          "nodes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "description": "Nodo de workflow (diagrama). Ver CATALOG.md › WorkflowNodeType.",
+                  "type": "string",
+                  "enum": [
+                    "start",
+                    "action",
+                    "approval",
+                    "decision",
+                    "parallel",
+                    "wait",
+                    "end"
+                  ]
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "position": {
+                  "type": "object",
+                  "properties": {
+                    "x": {
+                      "type": "number"
+                    },
+                    "y": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "x",
+                    "y"
+                  ],
+                  "additionalProperties": false,
+                  "default": {
+                    "x": 0,
+                    "y": 0
+                  }
+                },
+                "config": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "key": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "type",
+                "label",
+                "key"
+              ],
+              "additionalProperties": false
+            },
+            "default": []
+          },
+          "edges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "to": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "label": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "from",
+                "to"
+              ],
+              "additionalProperties": false
+            },
+            "default": []
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "default": []
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "default": ""
+          },
+          "trigger": {
+            "description": "Disparador de evento. Ver CATALOG.md › EventTrigger.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "on_create",
+                  "on_update",
+                  "on_delete",
+                  "on_state_change",
+                  "on_approve",
+                  "on_reject",
+                  "on_login",
+                  "scheduled",
+                  "webhook",
+                  "manual"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "action": {
+            "description": "Reacción al evento. Ver CATALOG.md › EventAction.",
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "send_email",
+                  "send_notification",
+                  "send_sms",
+                  "call_webhook",
+                  "trigger_workflow",
+                  "update_record",
+                  "enqueue_job",
+                  "log"
+                ]
+              },
+              {
+                "type": "string",
+                "pattern": "^custom:.+"
+              }
+            ]
+          },
+          "payload": {
+            "type": "string",
+            "default": ""
+          },
+          "entity": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "name",
+          "trigger"
+        ],
+        "additionalProperties": false
+      },
+      "default": []
+    },
+    "reports": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "default": ""
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": []
+          },
+          "filters": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "default": [],
+            "description": "Nombres de los campos por los que la persona puede filtrar (solo nombres)"
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "operator": {
+                  "type": "string",
+                  "description": "eq, neq, lt, lte, gt, gte, in, contains…"
+                },
+                "value": {}
+              },
+              "required": [
+                "field"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Condiciones fijas que el reporte siempre aplica: { field: status, operator: eq, value: CONFIRMADA }"
+          },
+          "entity": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "name",
+          "entity"
+        ],
+        "additionalProperties": false
+      },
+      "default": []
+    }
+  },
+  "required": [
+    "name",
+    "kind"
+  ],
+  "additionalProperties": false,
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SaaS Pack v2.0.0 · module"
+}

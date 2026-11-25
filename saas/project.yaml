@@ -1,0 +1,178 @@
+# yaml-language-server: $schema=schema/project.schema.json
+# SaaS Pack v2.0.0 · Mockup Studio · Proyecto, multi-tenant, seguridad, billing, políticas, eventos globales y dashboards
+# Valores válidos en CATALOG.md · Formato y referencias en README.md
+
+kind: project
+schemaVersion: 2.0.0
+extensions:
+  project.usuarios: Un solo usuario (Josh); marcas IGNIS y Personal
+  project.fases: F1 2D + costeo + producción; F2 3D, escenas IA y copys; F3 plugin de Illustrator y otros proveedores
+project:
+  name: Mockup Studio
+  slug: mockup-studio
+  tagline: Mockups automáticos y costeo de producción para IGNIS
+  description: Aplicación de escritorio local (Windows) para generar mockups 2D y 3D de prendas a partir de bases propias o del proveedor, aplicar diseños de Illustrator, simular técnica y acabado, generar lotes, archivos de producción por grupo de talla y calcular el costo de producción por pieza con maquila.
+  version: 0.1.0
+  language: es
+  languages: [es]
+  timezone: America/Mexico_City
+  currency: MXN
+  saasType: Internal
+  primaryColor: "#FF5A1F"
+multiTenant:
+  enabled: false
+  strategy: shared
+  subdomain: false
+  customDomain: false
+  isolationLevel: row
+security:
+  auth:
+    providers: [custom:sin-autenticacion-localhost]
+    mfa: false
+    sessionTimeout: 3600
+    jwtExpiry: 86400
+  encryption:
+    atRest: true
+    inTransit: false
+    algorithm: DPAPI de Windows (solo claves de API)
+  audit:
+    enabled: true
+    retention: 730
+  rateLimit:
+    enabled: false
+    requestsPerMinute: 60
+billing:
+  provider: none
+  trialDays: 0
+  currency: MXN
+policies:
+  - name: Usuario único y solo localhost
+    description: Kestrel escucha únicamente en 127.0.0.1 con puerto dinámico y token de arranque compartido con WebView2. Sin inicio de sesión; el rol propietario es implícito. Si algún día se expone en la red local, se debe activar autenticación antes.
+  - name: Tabla Actividades
+    description: Toda creación, actualización, eliminación, restauración, transición, importación, exportación, sincronización y llamada de IA registra una Actividad con los cambios en JSON (antes y después solo de los campos modificados). Se escribe en la misma transacción mediante un SaveChangesInterceptor de EF Core.
+  - name: IdUltimaActividad en todas las tablas
+    description: Todas las tablas excepto actividades tienen la columna IdUltimaActividad (propiedad C# IdUltimaActividad, TypeScript idUltimaActividad; en el pack ultimaActividadId) que apunta a la última Actividad del registro. La actualiza el mismo interceptor.
+  - name: Modelos alineados C# y TypeScript
+    description: Cada entidad expone un DTO C# y en el frontend una interfaz I<Entidad> idéntica más una clase <Entidad> que la implementa. Se generan desde OpenAPI con NSwag en cada build; prohibido escribirlas a mano.
+  - name: Claves de API cifradas
+    description: Las claves de Anthropic y Google se guardan cifradas con DPAPI (ámbito del usuario de Windows) en %LOCALAPPDATA%/MockupStudio/secrets.bin. Nunca en SQLite, logs ni respuestas de la API.
+  - name: IA opcional con aprobación
+    description: Ninguna imagen sale de la PC sin una acción explícita del usuario. Cada operación de IA muestra su costo estimado antes de ejecutarse y todo resultado de IA queda EN_REVISION hasta que el usuario lo aprueba.
+  - name: Reparto de proveedores de IA
+    description: "Claude (Anthropic) para visión y texto: clasificar prenda y vista, detectar zonas de impresión como JSON, revisar calidad de bases y redactar copys. Gemini (Nano Banana) para edición y generación de imágenes: limpiar y enderezar fotos, crear bases de prendas nuevas y escenas. Los modelos se configuran en Parametros."
+  - name: Pipeline local determinista
+    description: "Toda base usada en un mockup pasa por el pipeline local: recorte con BiRefNet (ONNX Runtime + DirectML con respaldo en CPU), máscara, mapa de desplazamiento (luminancia + desenfoque) y mapa de sombras con SkiaSharp. La IA generativa nunca produce la base final directamente."
+  - name: Licencias de modelos locales
+    description: Solo modelos con licencia que permita uso comercial (BiRefNet MIT, U2Net Apache-2.0). Prohibido RMBG de BRIA por licencia no comercial.
+  - name: Recoloreo de prendas
+    description: Las bases BLANCO o CLARO se recolorean con shader que multiplica la luminancia por el hex del ColorPrenda preservando sombras; los colores jaspeados agregan textura de jaspe. Las bases OSCURO solo se usan en su color original.
+  - name: Motor de render único
+    description: "El editor y los lotes usan el mismo motor dentro de WebView2: PixiJS v8 para 2D y three.js para 3D. Los lotes corren en un Web Worker con OffscreenCanvas de forma secuencial para no saturar la GPU integrada; el backend solo recibe los archivos y arma el ZIP."
+  - name: Grupos de talla y escalado del arte
+    description: El arte se escala por grupo de talla (por defecto XS-M y L-XL). Cada CapaComposicion define su tamaño base y ajustes por grupo en JSON. Tallas 2XL y mayores no se manejan.
+  - name: Área de impresión configurable
+    description: El área máxima se define por modelo, zona y grupo de talla; por defecto 40 x 50 cm en FRENTE y ESPALDA. El editor advierte cuando una capa excede el área.
+  - name: Archivos de producción
+    description: "Arte vectorial (SVG o AI guardado con compatibilidad PDF) se exporta como PDF vectorial al tamaño exacto en cm por zona y grupo de talla con PdfSharp. Arte raster se exporta como PNG 300 DPI con fondo transparente. No se genera .ai nativo: Illustrator abre el PDF editable."
+  - name: Fórmula de costo con maquila
+    description: Costo unitario = precio de maquila por pieza (incluye prenda) + costos adicionales por pieza (etiqueta impresa y bolsa) + envío fijo del pedido / cantidad. El precio del proveedor de prendas solo es referencia.
+  - name: Resolución de tarifa de maquila
+    description: Se elige la TarifaMaquila activa y vigente que cumpla técnica, número de zonas, número de colores y cantidad. Si varias aplican gana la de modelo específico y después la de mayor prioridad. Sin tarifa aplicable el cálculo falla con error explícito; nunca se asume cero.
+  - name: Cotización congelada
+    description: Al confirmar una cotización se congelan precios y desglose en JSON; cambios posteriores de tarifas no la alteran.
+  - name: Sincronización con M&O
+    description: Se leen los endpoints públicos de Shopify del proveedor (/products/<handle>.js) para colores, tallas, existencias, imágenes y precio base, a máximo 1 solicitud por segundo con caché. Los escalones de mayoreo se capturan a mano y el hex de cada color se sugiere desde la muestra para afinarlo manualmente.
+  - name: Almacenamiento local
+    description: Archivos en %LOCALAPPDATA%/MockupStudio/assets nombrados por hash SHA-256 para evitar duplicados. SQLite en modo WAL.
+  - name: Respaldo al homelab
+    description: "Respaldo diario a las 02:00: copia de SQLite con la API de backup y copia incremental de assets hacia la carpeta compartida del homelab. Retención de 30 días."
+  - name: Eliminación lógica
+    description: Diseños, bases, composiciones y tarifas usan borrado lógico. Los archivos físicos solo se purgan al vaciar la papelera.
+  - name: Logging
+    description: Serilog con logs estructurados en archivo rotativo diario (retención 14 días) y correlación por TrabajoId y LoteId.
+  - name: Nomenclatura de exportación
+    description: Patrón configurable por PerfilExportacion. Por defecto {marca}_{diseno}_{modelo}_{color}_{vista}_{perfil} en minúsculas y sin acentos.
+  - name: Instalación y actualizaciones
+    description: Instalador Velopack por usuario sin permisos de administrador. Auto-actualización desde GitHub Releases o carpeta del homelab. Las migraciones de EF Core se aplican al arrancar con respaldo previo de la base.
+events:
+  - name: respaldo.programado
+    description: Dispara el respaldo diario a las 02:00
+    trigger: scheduled
+    action: enqueue_job
+    entity: sistema.respaldo
+  - name: catalogo.sincronizacion-programada
+    description: Lunes 03:00 sincroniza modelos activos del proveedor
+    trigger: scheduled
+    action: enqueue_job
+    entity: catalogo.modelo-prenda
+dashboards:
+  - type: kpi
+    title: Diseños activos
+    dataSource: disenos.diseno
+    config:
+      entity: disenos.diseno
+      metric: count
+      filter: estado in [BORRADOR, EN_REVISION, APROBADO]
+    position: {x: 0, y: 0, w: 3, h: 2}
+  - type: kpi
+    title: Mockups generados este mes
+    dataSource: mockups.lote-item
+    config:
+      entity: mockups.lote-item
+      metric: count
+      filter: estado = LISTO
+      dateField: createdAt
+      interval: month
+    position: {x: 3, y: 0, w: 3, h: 2}
+  - type: kpi
+    title: Costo unitario promedio
+    dataSource: costos.cotizacion-costo
+    config:
+      entity: costos.cotizacion-costo
+      metric: avg
+      field: costoUnitario
+      filter: estado = CONFIRMADA
+    position: {x: 6, y: 0, w: 3, h: 2}
+  - type: kpi
+    title: Gasto de IA del mes (USD)
+    dataSource: ia.consumo-ia
+    config:
+      entity: ia.consumo-ia
+      metric: sum
+      field: costoEstimadoUsd
+      dateField: createdAt
+      interval: month
+    position: {x: 9, y: 0, w: 3, h: 2}
+  - type: list
+    title: Trabajos en curso y fallidos
+    dataSource: sistema.trabajo
+    config:
+      entity: sistema.trabajo
+      filter: estado in [PENDIENTE, EN_PROCESO, FALLIDO]
+      sort: createdAt desc
+      limit: 10
+    position: {x: 0, y: 2, w: 6, h: 4}
+  - type: list
+    title: Bases por revisar
+    dataSource: bases.base-mockup
+    config:
+      entity: bases.base-mockup
+      filter: estado = EN_REVISION
+      limit: 10
+    position: {x: 6, y: 2, w: 6, h: 4}
+  - type: bar
+    title: Lotes por estado
+    dataSource: mockups.lote
+    config:
+      entity: mockups.lote
+      metric: count
+      groupBy: estado
+    position: {x: 0, y: 6, w: 6, h: 4}
+  - type: timeline
+    title: Actividad reciente
+    dataSource: sistema.actividad
+    config:
+      entity: sistema.actividad
+      sort: createdAt desc
+      limit: 15
+    position: {x: 6, y: 6, w: 6, h: 4}

@@ -1,0 +1,485 @@
+# yaml-language-server: $schema=../schema/module.schema.json
+# SaaS Pack v2.0.0 · Mockup Studio · Módulo: entidades, pantallas, APIs, workflows, eventos y reportes
+# Valores válidos en CATALOG.md · Formato y referencias en README.md
+
+kind: module
+slug: mockups
+name: Mockups y lotes
+description: Perfiles de exportación, lotes automáticos (composiciones x colores x vistas x escenas x perfiles) y galería de resultados.
+icon: PhotoLibrary
+color: "#FFB020"
+order: 6
+phase: 1
+entities:
+  - slug: perfil-exportacion
+    name: PerfilExportacion
+    description: Formato de salida (Instagram, tienda, transparente, GIF o video 360).
+    icon: TableChart
+    tableName: perfiles_exportacion
+    scope: global
+    fields:
+      - name: nombre
+        type: string
+        maxLength: 80
+        isRequired: true
+        isUnique: true
+      - name: motor
+        type: enum
+        defaultValue: MOCKUP_2D
+        enumValues: [MOCKUP_2D, MOCKUP_3D]
+      - name: tipoSalida
+        type: enum
+        defaultValue: IMAGEN
+        enumValues: [IMAGEN, GIF, VIDEO_MP4]
+      - name: formato
+        type: enum
+        defaultValue: PNG
+        enumValues: [PNG, JPG, WEBP, GIF, MP4]
+      - name: anchoPx
+        type: int
+        isRequired: true
+      - name: altoPx
+        type: int
+        isRequired: true
+      - name: fondoTransparente
+        type: boolean
+        defaultValue: "false"
+      - name: calidad
+        type: smallint
+        defaultValue: "92"
+        validation: {min: 1, max: 100}
+      - name: escenaId
+        type: uuid
+      - name: patronNombre
+        type: string
+        defaultValue: "{marca}_{diseno}_{modelo}_{color}_{vista}_{perfil}"
+        maxLength: 200
+      - name: duracionSeg
+        type: smallint
+        description: Solo GIF o video
+      - name: fps
+        type: smallint
+      - name: activo
+        type: boolean
+        defaultValue: "true"
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+  - slug: lote
+    name: Lote
+    description: Generación masiva de mockups.
+    icon: TableChart
+    tableName: lotes
+    scope: global
+    audited: true
+    fields:
+      - name: marcaId
+        type: uuid
+        isRequired: true
+      - name: nombre
+        type: string
+        maxLength: 150
+        isRequired: true
+      - name: estado
+        type: enum
+        defaultValue: BORRADOR
+        enumValues: [BORRADOR, EN_COLA, PROCESANDO, COMPLETADO, CON_ERRORES, CANCELADO]
+      - name: configuracion
+        type: json
+        description: Selección original para regenerar
+      - name: totalItems
+        type: int
+        defaultValue: "0"
+      - name: itemsListos
+        type: int
+        defaultValue: "0"
+      - name: itemsFallidos
+        type: int
+        defaultValue: "0"
+      - name: archivoZip
+        type: file
+      - name: iniciadoEn
+        type: datetime
+      - name: terminadoEn
+        type: datetime
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+    stateMachine:
+      field: estado
+      initial: BORRADOR
+      states:
+        - name: BORRADOR
+          label: Borrador
+        - name: EN_COLA
+          label: En cola
+        - name: PROCESANDO
+          label: Procesando
+        - name: COMPLETADO
+          label: Completado
+          isFinal: true
+        - name: CON_ERRORES
+          label: Con errores
+        - name: CANCELADO
+          label: Cancelado
+          isFinal: true
+      transitions:
+        - from: [BORRADOR]
+          to: EN_COLA
+          action: encolar
+          event: lote.encolado
+          guard: totalItems > 0
+          roles: [propietario]
+        - from: [EN_COLA]
+          to: PROCESANDO
+          action: iniciar
+          event: lote.iniciado
+        - from: [PROCESANDO]
+          to: COMPLETADO
+          action: completar
+          event: lote.completado
+          guard: itemsFallidos == 0
+        - from: [PROCESANDO]
+          to: CON_ERRORES
+          action: completarConErrores
+          event: lote.con-errores
+        - from: [CON_ERRORES]
+          to: EN_COLA
+          action: reintentarFallidos
+          event: lote.reintentado
+          roles: [propietario]
+        - from: [BORRADOR, EN_COLA, PROCESANDO, CON_ERRORES]
+          to: CANCELADO
+          action: cancelar
+          event: lote.cancelado
+          roles: [propietario]
+  - slug: lote-item
+    name: LoteItem
+    description: Un mockup a renderizar dentro de un lote.
+    icon: TableChart
+    tableName: lote_items
+    scope: global
+    indexes:
+      - fields: [loteId, estado]
+        unique: false
+    fields:
+      - name: loteId
+        type: uuid
+        isRequired: true
+      - name: composicionId
+        type: uuid
+        isRequired: true
+      - name: baseMockupId
+        type: uuid
+        isRequired: true
+      - name: colorPrendaId
+        type: uuid
+        isRequired: true
+      - name: escenaId
+        type: uuid
+      - name: perfilExportacionId
+        type: uuid
+        isRequired: true
+      - name: nombreArchivo
+        type: string
+        maxLength: 250
+        isRequired: true
+      - name: estado
+        type: enum
+        defaultValue: PENDIENTE
+        enumValues: [PENDIENTE, RENDERIZANDO, LISTO, FALLIDO]
+      - name: archivo
+        type: file
+      - name: miniatura
+        type: image
+      - name: error
+        type: text
+      - name: duracionMs
+        type: int
+      - name: favorito
+        type: boolean
+        defaultValue: "false"
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+    stateMachine:
+      field: estado
+      initial: PENDIENTE
+      states:
+        - name: PENDIENTE
+          label: Pendiente
+        - name: RENDERIZANDO
+          label: Renderizando
+        - name: LISTO
+          label: Listo
+          isFinal: true
+        - name: FALLIDO
+          label: Fallido
+      transitions:
+        - from: [PENDIENTE]
+          to: RENDERIZANDO
+          action: tomar
+          event: lote-item.tomado
+        - from: [RENDERIZANDO]
+          to: LISTO
+          action: entregar
+          event: lote-item.listo
+        - from: [RENDERIZANDO]
+          to: FALLIDO
+          action: fallar
+          event: lote-item.fallido
+        - from: [FALLIDO, RENDERIZANDO]
+          to: PENDIENTE
+          action: reintentar
+          event: lote-item.reintentado
+screens:
+  - name: Lotes
+    type: List
+    route: /mockups/lotes
+    menuLabel: LOTES
+    menuIcon: PhotoLibrary
+    entity: mockups.lote
+  - name: Nuevo lote
+    type: Wizard
+    route: /mockups/lotes/nuevo
+    menuLabel: Nuevo lote
+    menuIcon: AddToPhotos
+    entity: mockups.lote
+  - name: Lote
+    type: Detail
+    route: /mockups/lotes/:id
+    menuLabel: Lote
+    menuIcon: PhotoLibrary
+    entity: mockups.lote
+  - name: Galería
+    type: List
+    route: /mockups/galeria
+    menuLabel: GALERÍA
+    menuIcon: Collections
+    entity: mockups.lote-item
+  - name: Perfiles de exportación
+    type: List
+    route: /mockups/perfiles
+    menuLabel: Perfiles de exportación
+    menuIcon: Output
+    entity: mockups.perfil-exportacion
+  - name: Perfil de exportación
+    type: Form
+    route: /mockups/perfiles/:id
+    menuLabel: Perfil
+    menuIcon: Output
+    entity: mockups.perfil-exportacion
+apis:
+  - name: Listar perfiles
+    method: GET
+    path: /api/perfiles-exportacion
+    tags: [mockups]
+    entity: mockups.perfil-exportacion
+  - name: Guardar perfil
+    method: PUT
+    path: /api/perfiles-exportacion/{id}
+    tags: [mockups]
+    entity: mockups.perfil-exportacion
+  - name: Previsualizar lote
+    method: POST
+    path: /api/lotes/previsualizar
+    description: Devuelve combinaciones y total sin crear
+    tags: [mockups]
+    entity: mockups.lote
+  - name: Crear lote
+    method: POST
+    path: /api/lotes
+    description: Expande combinaciones a LoteItem
+    tags: [mockups]
+    entity: mockups.lote
+  - name: Listar lotes
+    method: GET
+    path: /api/lotes
+    tags: [mockups]
+    entity: mockups.lote
+  - name: Obtener lote
+    method: GET
+    path: /api/lotes/{id}
+    tags: [mockups]
+    entity: mockups.lote
+  - name: Encolar lote
+    method: POST
+    path: /api/lotes/{id}/encolar
+    tags: [mockups]
+    entity: mockups.lote
+  - name: Tomar siguiente item
+    method: POST
+    path: /api/lotes/{id}/siguiente
+    description: El worker del frontend toma el siguiente PENDIENTE con todo lo necesario para renderizar
+    tags: [mockups]
+    entity: mockups.lote-item
+  - name: Entregar resultado
+    method: PUT
+    path: /api/lote-items/{id}/resultado
+    description: Multipart con la imagen renderizada
+    tags: [mockups]
+    entity: mockups.lote-item
+  - name: Reportar fallo
+    method: POST
+    path: /api/lote-items/{id}/fallo
+    tags: [mockups]
+    entity: mockups.lote-item
+  - name: Reintentar fallidos
+    method: POST
+    path: /api/lotes/{id}/reintentar
+    tags: [mockups]
+    entity: mockups.lote
+  - name: Cancelar lote
+    method: POST
+    path: /api/lotes/{id}/cancelar
+    tags: [mockups]
+    entity: mockups.lote
+  - name: Descargar ZIP
+    method: GET
+    path: /api/lotes/{id}/zip
+    tags: [mockups]
+    entity: mockups.lote
+  - name: Marcar favorito
+    method: PATCH
+    path: /api/lote-items/{id}
+    tags: [mockups]
+    entity: mockups.lote-item
+  - name: Exportación rápida
+    method: POST
+    path: /api/mockups/rapido
+    description: Crea un lote de un solo item desde el editor
+    tags: [mockups]
+    entity: mockups.lote
+workflows:
+  - name: Render de lote
+    description: El frontend renderiza item por item y el backend empaqueta.
+    trigger: lote.encolado
+    steps:
+      - type: trigger
+        label: Lote encolado
+        config:
+          event: lote.encolado
+      - type: action
+        label: Iniciar lote
+        config:
+          service: Lote.iniciar
+      - type: loop
+        label: Por cada item pendiente
+        config:
+          items: LoteItem PENDIENTE
+      - type: script
+        label: Renderizar en Web Worker
+        config:
+          handler: frontend/workers/render-lote.worker.ts
+      - type: action
+        label: Guardar resultado
+        config:
+          service: LoteItemService.Entregar
+      - type: condition
+        label: ¿Hubo fallidos?
+        config:
+          condition: itemsFallidos > 0
+      - type: action
+        label: Armar ZIP
+        config:
+          service: ZipService
+      - type: notification
+        label: Avisar lote terminado
+        config:
+          channel: toast-windows
+      - type: end
+        label: Fin
+    nodes:
+      - key: lote-encolado
+        type: start
+        label: Lote encolado
+        position: {x: 0, y: 0}
+      - key: iniciar-lote
+        type: action
+        label: Iniciar lote
+        position: {x: 240, y: 0}
+      - key: por-cada-item-pendiente
+        type: action
+        label: Por cada item pendiente
+        position: {x: 480, y: 0}
+      - key: renderizar-en-web-worker
+        type: action
+        label: Renderizar en Web Worker
+        position: {x: 720, y: 0}
+      - key: guardar-resultado
+        type: action
+        label: Guardar resultado
+        position: {x: 960, y: 0}
+      - key: hubo-fallidos
+        type: decision
+        label: ¿Hubo fallidos?
+        position: {x: 1200, y: 0}
+      - key: armar-zip
+        type: action
+        label: Armar ZIP
+        position: {x: 1440, y: 0}
+      - key: avisar-lote-terminado
+        type: action
+        label: Avisar lote terminado
+        position: {x: 1680, y: 0}
+      - key: fin
+        type: end
+        label: Fin
+        position: {x: 1920, y: 0}
+    edges:
+      - from: lote-encolado
+        to: iniciar-lote
+      - from: iniciar-lote
+        to: por-cada-item-pendiente
+      - from: por-cada-item-pendiente
+        to: renderizar-en-web-worker
+      - from: renderizar-en-web-worker
+        to: guardar-resultado
+      - from: guardar-resultado
+        to: hubo-fallidos
+      - from: hubo-fallidos
+        to: armar-zip
+        label: no
+      - from: hubo-fallidos
+        to: avisar-lote-terminado
+        label: sí
+      - from: armar-zip
+        to: avisar-lote-terminado
+      - from: avisar-lote-terminado
+        to: fin
+events:
+  - name: lote.encolado
+    trigger: on_state_change
+    action: trigger_workflow
+    entity: mockups.lote
+  - name: lote.completado
+    trigger: on_state_change
+    action: send_notification
+    entity: mockups.lote
+  - name: lote.con-errores
+    trigger: on_state_change
+    action: send_notification
+    entity: mockups.lote
+  - name: lote-item.listo
+    description: Incrementa itemsListos del lote y emite progreso por SignalR
+    trigger: on_state_change
+    action: update_record
+    entity: mockups.lote-item
+  - name: lote-item.fallido
+    description: Incrementa itemsFallidos
+    trigger: on_state_change
+    action: update_record
+    entity: mockups.lote-item
+reports:
+  - name: Lotes
+    columns: [nombre, estado, totalItems, itemsListos, itemsFallidos, terminadoEn]
+    filters: [marcaId, estado]
+    entity: mockups.lote
+  - name: Mockups favoritos
+    columns: [nombreArchivo, composicionId, colorPrendaId, perfilExportacionId]
+    filters: [composicionId, colorPrendaId]
+    conditions:
+      - field: favorito
+        operator: eq
+        value: true
+    entity: mockups.lote-item

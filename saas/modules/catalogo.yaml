@@ -1,0 +1,512 @@
+# yaml-language-server: $schema=../schema/module.schema.json
+# SaaS Pack v2.0.0 · Mockup Studio · Módulo: entidades, pantallas, APIs, workflows, eventos y reportes
+# Valores válidos en CATALOG.md · Formato y referencias en README.md
+
+kind: module
+slug: catalogo
+name: Catálogo de prendas
+description: Proveedores, modelos de prenda, colores, grupos de talla, zonas y áreas de impresión, y escalones de precio de referencia.
+icon: Checkroom
+color: "#22C55E"
+order: 3
+phase: 1
+entities:
+  - slug: proveedor
+    name: Proveedor
+    description: Proveedor de prendas (M&O) o maquilador.
+    icon: TableChart
+    tableName: proveedores
+    scope: global
+    softDelete: true
+    audited: true
+    fields:
+      - name: nombre
+        type: string
+        maxLength: 120
+        isRequired: true
+      - name: tipo
+        type: enum
+        enumValues: [PRENDAS, MAQUILA, AMBOS]
+        isRequired: true
+      - name: plataforma
+        type: enum
+        defaultValue: MANUAL
+        enumValues: [SHOPIFY, MANUAL]
+      - name: sitioWeb
+        type: url
+      - name: contacto
+        type: string
+        maxLength: 120
+      - name: telefono
+        type: phone
+      - name: email
+        type: email
+      - name: notas
+        type: text
+      - name: activo
+        type: boolean
+        defaultValue: "true"
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+  - slug: modelo-prenda
+    name: ModeloPrenda
+    description: Modelo del proveedor (4800, 3320, 5542, 6500, 7810) o prenda genérica.
+    icon: TableChart
+    tableName: modelos_prenda
+    scope: global
+    softDelete: true
+    audited: true
+    indexes:
+      - fields: [proveedorId, codigo]
+        unique: true
+    fields:
+      - name: proveedorId
+        type: uuid
+        isRequired: true
+      - name: codigo
+        type: string
+        maxLength: 30
+        isRequired: true
+      - name: nombre
+        type: string
+        maxLength: 150
+        isRequired: true
+      - name: categoria
+        type: enum
+        enumValues: [PLAYERA, PLAYERA_VINTAGE, RAGLAN, HOODIE, SUDADERA, SHORT, PANTS, GORRA, TOTE, OTRA]
+        isRequired: true
+      - name: corte
+        type: enum
+        defaultValue: REGULAR
+        enumValues: [REGULAR, OVERSIZE, SLIM, BOXY]
+      - name: gramaje
+        type: smallint
+        description: Gramos
+      - name: composicion
+        type: string
+        maxLength: 150
+      - name: tallasDisponibles
+        type: array
+        description: Tallas manejadas; XS a XL
+      - name: urlProducto
+        type: url
+      - name: handleTienda
+        type: string
+        description: Handle de Shopify para sincronizar
+        maxLength: 200
+      - name: precioReferencia
+        type: money
+        description: Precio base del proveedor con IVA; solo referencia
+      - name: imagenReferencia
+        type: image
+      - name: descripcion
+        type: text
+      - name: activo
+        type: boolean
+        defaultValue: "true"
+      - name: sincronizadoEn
+        type: datetime
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+  - slug: color-prenda
+    name: ColorPrenda
+    description: Color disponible de un modelo.
+    icon: TableChart
+    tableName: colores_prenda
+    scope: global
+    indexes:
+      - fields: [modeloPrendaId, nombre]
+        unique: true
+    fields:
+      - name: modeloPrendaId
+        type: uuid
+        isRequired: true
+      - name: nombre
+        type: string
+        maxLength: 80
+        isRequired: true
+      - name: codigoProveedor
+        type: string
+        maxLength: 80
+      - name: hex
+        type: color
+        isRequired: true
+      - name: hexAjustadoManual
+        type: boolean
+        defaultValue: "false"
+      - name: esJaspeado
+        type: boolean
+        defaultValue: "false"
+      - name: tono
+        type: enum
+        defaultValue: CLARO
+        enumValues: [CLARO, OSCURO]
+      - name: composicion
+        type: string
+        maxLength: 120
+      - name: imagenFrente
+        type: image
+      - name: imagenEspalda
+        type: image
+      - name: disponible
+        type: boolean
+        defaultValue: "true"
+      - name: existencias
+        type: int
+      - name: orden
+        type: smallint
+        defaultValue: "0"
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+  - slug: grupo-talla
+    name: GrupoTalla
+    description: Agrupa tallas que comparten tamaño de arte (XS-M y L-XL).
+    icon: TableChart
+    tableName: grupos_talla
+    scope: global
+    fields:
+      - name: nombre
+        type: string
+        maxLength: 40
+        isRequired: true
+        isUnique: true
+      - name: tallas
+        type: array
+        isRequired: true
+      - name: orden
+        type: smallint
+        defaultValue: "0"
+      - name: activo
+        type: boolean
+        defaultValue: "true"
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+  - slug: escalon-precio-proveedor
+    name: EscalonPrecioProveedor
+    description: Precio por volumen del proveedor de prendas (referencia).
+    icon: TableChart
+    tableName: escalones_precio_proveedor
+    scope: global
+    fields:
+      - name: modeloPrendaId
+        type: uuid
+        isRequired: true
+      - name: cantidadMin
+        type: int
+        validation: {min: 1}
+        isRequired: true
+      - name: cantidadMax
+        type: int
+        description: Nulo = sin límite
+      - name: precioUnitario
+        type: money
+        validation: {min: 0}
+        isRequired: true
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+  - slug: zona-impresion
+    name: ZonaImpresion
+    description: Zona imprimible de un modelo.
+    icon: TableChart
+    tableName: zonas_impresion
+    scope: global
+    indexes:
+      - fields: [modeloPrendaId, codigo]
+        unique: true
+    fields:
+      - name: modeloPrendaId
+        type: uuid
+        isRequired: true
+      - name: codigo
+        type: enum
+        enumValues:
+          - FRENTE
+          - ESPALDA
+          - MANGA_IZQUIERDA
+          - MANGA_DERECHA
+          - CUELLO_EXTERIOR
+          - ETIQUETA_INTERNA
+          - BOLSILLO
+          - CAPUCHA
+          - PIERNA_IZQUIERDA
+          - PIERNA_DERECHA
+          - OTRA
+        isRequired: true
+      - name: nombre
+        type: string
+        maxLength: 80
+        isRequired: true
+      - name: vista
+        type: enum
+        enumValues: [FRENTE, ESPALDA, IZQUIERDA, DERECHA]
+        isRequired: true
+      - name: orden
+        type: smallint
+        defaultValue: "0"
+      - name: activa
+        type: boolean
+        defaultValue: "true"
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+  - slug: area-impresion
+    name: AreaImpresion
+    description: Medidas máximas por zona y grupo de talla.
+    icon: TableChart
+    tableName: areas_impresion
+    scope: global
+    indexes:
+      - fields: [zonaImpresionId, grupoTallaId]
+        unique: true
+    fields:
+      - name: zonaImpresionId
+        type: uuid
+        isRequired: true
+      - name: grupoTallaId
+        type: uuid
+        isRequired: true
+      - name: anchoMaxCm
+        type: decimal
+        defaultValue: "40"
+        precision: 6
+        scale: 2
+      - name: altoMaxCm
+        type: decimal
+        defaultValue: "50"
+        precision: 6
+        scale: 2
+      - name: distanciaCuelloCm
+        type: decimal
+        defaultValue: "7"
+        precision: 5
+        scale: 2
+      - name: ultimaActividadId
+        type: uuid
+        description: Columna IdUltimaActividad
+screens:
+  - name: Proveedores
+    type: List
+    route: /catalogo/proveedores
+    menuLabel: Proveedores
+    menuIcon: Store
+    entity: catalogo.proveedor
+  - name: Proveedor
+    type: Form
+    route: /catalogo/proveedores/:id
+    menuLabel: Proveedor
+    menuIcon: Store
+    entity: catalogo.proveedor
+  - name: Modelos de prenda
+    type: List
+    route: /catalogo/modelos
+    menuLabel: PRENDAS
+    menuIcon: Checkroom
+    entity: catalogo.modelo-prenda
+  - name: Modelo de prenda
+    type: Detail
+    route: /catalogo/modelos/:id
+    menuLabel: Modelo
+    menuIcon: Checkroom
+    entity: catalogo.modelo-prenda
+  - name: Grupos de talla
+    type: Settings
+    route: /catalogo/grupos-talla
+    menuLabel: Grupos de talla
+    menuIcon: Straighten
+    entity: catalogo.grupo-talla
+apis:
+  - name: Listar proveedores
+    method: GET
+    path: /api/proveedores
+    tags: [catalogo]
+    entity: catalogo.proveedor
+  - name: Crear proveedor
+    method: POST
+    path: /api/proveedores
+    tags: [catalogo]
+    entity: catalogo.proveedor
+  - name: Editar proveedor
+    method: PUT
+    path: /api/proveedores/{id}
+    tags: [catalogo]
+    entity: catalogo.proveedor
+  - name: Eliminar proveedor
+    method: DELETE
+    path: /api/proveedores/{id}
+    tags: [catalogo]
+    entity: catalogo.proveedor
+  - name: Listar modelos
+    method: GET
+    path: /api/modelos
+    tags: [catalogo]
+    entity: catalogo.modelo-prenda
+  - name: Obtener modelo
+    method: GET
+    path: /api/modelos/{id}
+    description: Incluye colores, zonas, áreas y escalones
+    tags: [catalogo]
+    entity: catalogo.modelo-prenda
+  - name: Crear modelo
+    method: POST
+    path: /api/modelos
+    tags: [catalogo]
+    entity: catalogo.modelo-prenda
+  - name: Importar modelo desde URL
+    method: POST
+    path: /api/modelos/importar-url
+    description: Recibe URL de producto de Shopify y crea modelo con colores
+    tags: [catalogo]
+    entity: catalogo.modelo-prenda
+  - name: Editar modelo
+    method: PUT
+    path: /api/modelos/{id}
+    tags: [catalogo]
+    entity: catalogo.modelo-prenda
+  - name: Sincronizar modelo
+    method: POST
+    path: /api/modelos/{id}/sincronizar
+    tags: [catalogo]
+    entity: catalogo.modelo-prenda
+  - name: Sincronizar proveedor
+    method: POST
+    path: /api/proveedores/{id}/sincronizar
+    tags: [catalogo]
+    entity: catalogo.proveedor
+  - name: Editar color
+    method: PUT
+    path: /api/colores/{id}
+    tags: [catalogo]
+    entity: catalogo.color-prenda
+  - name: Guardar zonas y áreas
+    method: PUT
+    path: /api/modelos/{id}/zonas
+    tags: [catalogo]
+    entity: catalogo.zona-impresion
+  - name: Guardar escalones
+    method: PUT
+    path: /api/modelos/{id}/escalones
+    tags: [catalogo]
+    entity: catalogo.escalon-precio-proveedor
+  - name: Listar grupos de talla
+    method: GET
+    path: /api/grupos-talla
+    tags: [catalogo]
+    entity: catalogo.grupo-talla
+  - name: Guardar grupos de talla
+    method: PUT
+    path: /api/grupos-talla
+    tags: [catalogo]
+    entity: catalogo.grupo-talla
+workflows:
+  - name: Sincronizar modelo con M&O
+    description: Actualiza colores, tallas, existencias, imágenes y precio base desde Shopify.
+    trigger: catalogo.sincronizacion-programada
+    steps:
+      - type: trigger
+        label: Programado o manual
+        config:
+          event: catalogo.sincronizacion-programada
+      - type: webhook
+        label: Leer producto
+        config:
+          url: "{baseUrl}/products/{handle}.js"
+          method: GET
+      - type: loop
+        label: Por cada variante
+        config:
+          items: variants
+      - type: action
+        label: Actualizar colores y existencias
+        config:
+          service: CatalogoSyncService.UpsertColor
+      - type: action
+        label: Descargar imágenes nuevas
+        config:
+          service: AssetStore.DescargarSiCambio
+      - type: condition
+        label: ¿Cambió el precio base?
+        config:
+          condition: precioNuevo != precioReferencia
+      - type: notification
+        label: Avisar cambio de precio
+        config:
+          channel: toast-windows
+          template: precio-proveedor-cambio
+      - type: end
+        label: Fin
+    nodes:
+      - key: programado-o-manual
+        type: start
+        label: Programado o manual
+        position: {x: 0, y: 0}
+      - key: leer-producto
+        type: action
+        label: Leer producto
+        position: {x: 240, y: 0}
+      - key: por-cada-variante
+        type: action
+        label: Por cada variante
+        position: {x: 480, y: 0}
+      - key: actualizar-colores-y-existencias
+        type: action
+        label: Actualizar colores y existencias
+        position: {x: 720, y: 0}
+      - key: descargar-imagenes-nuevas
+        type: action
+        label: Descargar imágenes nuevas
+        position: {x: 960, y: 0}
+      - key: cambio-el-precio-base
+        type: decision
+        label: ¿Cambió el precio base?
+        position: {x: 1200, y: 0}
+      - key: avisar-cambio-de-precio
+        type: action
+        label: Avisar cambio de precio
+        position: {x: 1440, y: 0}
+      - key: fin
+        type: end
+        label: Fin
+        position: {x: 1680, y: 0}
+    edges:
+      - from: programado-o-manual
+        to: leer-producto
+      - from: leer-producto
+        to: por-cada-variante
+      - from: por-cada-variante
+        to: actualizar-colores-y-existencias
+      - from: actualizar-colores-y-existencias
+        to: descargar-imagenes-nuevas
+      - from: descargar-imagenes-nuevas
+        to: cambio-el-precio-base
+      - from: cambio-el-precio-base
+        to: avisar-cambio-de-precio
+        label: sí
+      - from: cambio-el-precio-base
+        to: fin
+        label: no
+      - from: avisar-cambio-de-precio
+        to: fin
+events:
+  - name: modelo-prenda.sincronizado
+    trigger: manual
+    action: log
+    entity: catalogo.modelo-prenda
+  - name: color-prenda.agotado
+    description: Cuando disponible pasa a false
+    trigger: on_update
+    action: send_notification
+    entity: catalogo.color-prenda
+reports:
+  - name: Colores por modelo
+    columns: [nombre, hex, tono, esJaspeado, existencias, disponible]
+    filters: [modeloPrendaId, tono, disponible]
+    entity: catalogo.color-prenda
+  - name: Áreas de impresión
+    columns: [zonaImpresionId, grupoTallaId, anchoMaxCm, altoMaxCm]
+    filters: [grupoTallaId]
+    entity: catalogo.area-impresion
